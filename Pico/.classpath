@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="C:/dq-mariner4-4.3.4.10/lib/m4_client.jar"/>
+	<classpathentry kind="lib" path="C:/dq-mariner4-4.3.4.10/lib/m4_common.jar"/>
+	<classpathentry kind="lib" path="C:/dq-mariner4-4.3.4.10/lib/m4_util.jar"/>
+	<classpathentry kind="lib" path="C:/dq-mariner4-4.3.4.10/lib/m4_core.jar"/>
+	<classpathentry kind="lib" path="C:/dq-mariner4-4.3.4.10/util/restServer/lib/m4_rest.jar"/>
+	<classpathentry kind="lib" path="C:/dq-mariner4-4.3.4.10/util/restServer/lib/gson-2.3.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
