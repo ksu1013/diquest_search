@@ -1,3 +1,4 @@
+<%@page import="javax.servlet.http.Cookie"%>
 <%@ page import="java.util.*"%>
 <%@ page import="java.util.ArrayList.*"%>
 <%@ page import="java.text.*"%>
@@ -185,7 +186,7 @@ public Map<String, Object> getResult(Map<String, String> params) {
 	}
 	
 	try {
-		CommandSearchRequest.setProps(mip, Integer.parseInt(mport), 10000, 50, 50);	// ip, port, ÀÀ´ä½Ã°£, min pool size, max pool size
+		CommandSearchRequest.setProps(mip, Integer.parseInt(mport), 10000, 50, 50);	// ip, port, ì‘ë‹µì‹œê°„, min pool size, max pool size
 	    CommandSearchRequest command = new CommandSearchRequest(mip, Integer.parseInt(mport));
 		
 		int returnCode = command.request(querySet);
@@ -284,7 +285,7 @@ public ArrayList<HashMap<String, String>> getResultHot(Map<String, String> param
 	querySet.addQuery(query);
 	
 	try {
-		CommandSearchRequest.setProps(mip, Integer.parseInt(mport), 10000, 50, 50);	// ip, port, ÀÀ´ä½Ã°£, min pool size, max pool size
+		CommandSearchRequest.setProps(mip, Integer.parseInt(mport), 10000, 50, 50);	// ip, port, ì‘ë‹µì‹œê°„, min pool size, max pool size
 	    CommandSearchRequest command = new CommandSearchRequest(mip, Integer.parseInt(mport));
 		
 		int returnCode = command.request(querySet);
@@ -394,8 +395,8 @@ public Query getQuery(Map<String, String> params, String menu) {
 		query.setLogKeyword(logKeyword.toCharArray());
 	}
 	
-	query.setSearchOption((byte)(Protocol.SearchOption.CACHE | Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD));	// °Ë»ö Ä³½Ã, ±İÁö¾î, ºÒ¿ë¾î »çÀü »ç¿ë ¼³Á¤ 
-	query.setThesaurusOption((byte)(Protocol.ThesaurusOption.QUASI_SYNONYM | Protocol.ThesaurusOption.EQUIV_SYNONYM));			// µ¿ÀÇ¾î, À¯ÀÇ¾î »çÀü »ç¿ë ¼³Á¤ 
+	query.setSearchOption((byte)(Protocol.SearchOption.CACHE | Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD));	// ê²€ìƒ‰ ìºì‹œ, ê¸ˆì§€ì–´, ë¶ˆìš©ì–´ ì‚¬ì „ ì‚¬ìš© ì„¤ì • 
+	query.setThesaurusOption((byte)(Protocol.ThesaurusOption.QUASI_SYNONYM | Protocol.ThesaurusOption.EQUIV_SYNONYM));			// ë™ì˜ì–´, ìœ ì˜ì–´ ì‚¬ì „ ì‚¬ìš© ì„¤ì • 
 	
 	return query;
 	
@@ -606,7 +607,7 @@ public SelectSet[] getSelectSet(String menu) {
 	if (menu.equals("menu")) {
 		selectSet = new SelectSet[]{
 				new SelectSet("URL"),
-				new SelectSet("FULL_NM", (byte) (Protocol.SelectSet.HIGHLIGHT)) //Ãß°¡ÇÑ°Å
+				new SelectSet("FULL_NM", (byte) (Protocol.SelectSet.HIGHLIGHT)) //ì¶”ê°€í•œê±°
 		};
 	} 
 
@@ -644,7 +645,7 @@ public SelectSet[] getSelectSet(String menu) {
 		selectSet = new SelectSet[]{
 				new SelectSet("URL"), 
 				new SelectSet("MENU_CD", (byte) (Protocol.SelectSet.HIGHLIGHT)),
-				new SelectSet("FILE_CONTENT", (byte) (Protocol.SelectSet.HIGHLIGHT)), //Ãß°¡ÇÑ°Å
+				new SelectSet("FILE_CONTENT", (byte) (Protocol.SelectSet.HIGHLIGHT)), //ì¶”ê°€í•œê±°
 				new SelectSet("MENU_NM", (byte) (Protocol.SelectSet.HIGHLIGHT)),
 				new SelectSet("FULL_NM", (byte) (Protocol.SelectSet.HIGHLIGHT)),
 				new SelectSet("DATA_SID", (byte) (Protocol.SelectSet.HIGHLIGHT)),
@@ -659,7 +660,7 @@ public SelectSet[] getSelectSet(String menu) {
 		selectSet = new SelectSet[]{
 				new SelectSet("URL"), 
 				new SelectSet("MENU_CD", (byte) (Protocol.SelectSet.HIGHLIGHT)),
-				new SelectSet("REGISTER_DT", (byte) (Protocol.SelectSet.HIGHLIGHT)), //Ãß°¡ÇÑ°Å
+				new SelectSet("REGISTER_DT", (byte) (Protocol.SelectSet.HIGHLIGHT)), //ì¶”ê°€í•œê±°
 				new SelectSet("MENU_NM", (byte) (Protocol.SelectSet.HIGHLIGHT)),
 				new SelectSet("DATA_SID", (byte) (Protocol.SelectSet.HIGHLIGHT)),
 				new SelectSet("DATA_TITLE", (byte) (Protocol.SelectSet.HIGHLIGHT)),
@@ -674,7 +675,7 @@ public SelectSet[] getSelectSet(String menu) {
 		selectSet = new SelectSet[]{
 				new SelectSet("URL"), 
 				new SelectSet("MENU_CD", (byte) (Protocol.SelectSet.HIGHLIGHT)),
-				new SelectSet("REGISTER_DT", (byte) (Protocol.SelectSet.HIGHLIGHT)), //Ãß°¡ÇÑ°Å
+				new SelectSet("REGISTER_DT", (byte) (Protocol.SelectSet.HIGHLIGHT)), //ì¶”ê°€í•œê±°
 				new SelectSet("MENU_NM", (byte) (Protocol.SelectSet.HIGHLIGHT)),
 				new SelectSet("DATA_SID", (byte) (Protocol.SelectSet.HIGHLIGHT)),
 				new SelectSet("DATA_TITLE", (byte) (Protocol.SelectSet.HIGHLIGHT)),
@@ -709,10 +710,10 @@ public String getPageNavi(String menu, String currentPage, int totalSize) {
 		endpage = lastPage;
 	}
 	
-	String pageStr = "<span class=\"first\"><a href=\"javascript:paging('1','" + menu + "');\">Ã³À½À¸·Î</a></span>&nbsp;&nbsp;";
+	String pageStr = "<span class=\"first\"><a href=\"javascript:paging('1','" + menu + "');\">ì²˜ìŒìœ¼ë¡œ</a></span>&nbsp;&nbsp;";
 	
 	if (startpage > pageBlock) {
-		pageStr = pageStr + "<span class=\"prev\"><a href=\"javascript:prepaging('" + currentPage + "','" + menu + "');\">ÀÌÀü</a></span>&nbsp;&nbsp;";
+		pageStr = pageStr + "<span class=\"prev\"><a href=\"javascript:prepaging('" + currentPage + "','" + menu + "');\">ì´ì „</a></span>&nbsp;&nbsp;";
 	}
 	
 	for (int i=startpage; i<= endpage; i++) {
@@ -720,10 +721,10 @@ public String getPageNavi(String menu, String currentPage, int totalSize) {
 	}
 	
 	if (endpage < lastPage) {
-		pageStr = pageStr + "<span class=\"next\"><a href=\"javascript:nextpaging('" + currentPage + "','" + menu + "');\">´ÙÀ½</a></span>&nbsp;&nbsp;";
+		pageStr = pageStr + "<span class=\"next\"><a href=\"javascript:nextpaging('" + currentPage + "','" + menu + "');\">ë‹¤ìŒ</a></span>&nbsp;&nbsp;";
 	}
 	
-	pageStr = pageStr + "<span class=\"last\"><a href=\"javascript:paging('" + lastPage + "','" + menu + "');\">³¡À¸·Î</a></span>";
+	pageStr = pageStr + "<span class=\"last\"><a href=\"javascript:paging('" + lastPage + "','" + menu + "');\">ëìœ¼ë¡œ</a></span>";
 
 	return pageStr;
 	
@@ -778,7 +779,7 @@ $(document).ready(function(e) {
 			var searchName =$(".sch_txt").val();
 			console.log(searchName);
 			if ($('.sch_txt').val()==''){
-				alert('°Ë»ö¾î¸¦ ÀÔ·ÂÇÏ¼¼¿ä');
+				alert('ê²€ìƒ‰ì–´ë¥¼ ì…ë ¥í•˜ì„¸ìš”');
 				return false;
 			}else{
 				setSearchCookie('cookieName',searchName);
@@ -807,7 +808,7 @@ $(document).ready(function(e) {
 	console.log(text);
 	}
 	}else {
-	text += "<li>°Ë»ö¾î°¡ ¾ø½À´Ï´Ù.</li>";
+	text += "<li>ê²€ìƒ‰ì–´ê°€ ì—†ìŠµë‹ˆë‹¤.</li>";
 	}
 	$("#recent").html(text); 
 
@@ -821,7 +822,7 @@ function p_menu(menu) {
 	/* var searchCheck=document.frmSearch.searchTerm.value;
 	//alert(searchCheck);
 	if(searchCheck==""){
-		alert('°Ë»ö¹öÆ°À» ´­·¯ÁÖ¼¼¿ä')
+		alert('ê²€ìƒ‰ë²„íŠ¼ì„ ëˆŒëŸ¬ì£¼ì„¸ìš”')
 	}else{ */
 	document.p_menu_tap.menu.value = menu;
 	document.p_menu_tap.currentPage.value = 1;
@@ -930,7 +931,7 @@ function getSearchCookie(cookieName) {
 </script>
 <style >
 
-/* ÀÌ¹ÌÁö ¼­Ä¡¿ë */
+/* ì´ë¯¸ì§€ ì„œì¹˜ìš© */
 .sch_imglist_test{padding-bottom:20px;border-bottom:1px solid #dedede;}
 .sch_imglist_test:after{display: block; clear: both; content: "";}
 .sch_imglist_test li{float:left;width:100%;text-align:center;margin:20px 0 0 0}
@@ -942,8 +943,8 @@ function getSearchCookie(cookieName) {
 
 
  
-/* ÆäÀÌÂ¡ */
-.sch_con .sch_left .paging {text-align:center;margin-top:20px;font-family:µ¸¿ò;}
+/* í˜ì´ì§• */
+.sch_con .sch_left .paging {text-align:center;margin-top:20px;font-family:ë‹ì›€;}
 .sch_con .sch_left .paging span {display:inline-block;border:1px solid #ccc;border-radius:3px;color:#343434;}
 .sch_con .sch_left .paging span a {display:block;padding:3px 6px 1px 6px;border-radius:3px;}
 .sch_con .sch_left .paging span a:hover {text-decoration:none;}
@@ -976,7 +977,7 @@ function getSearchCookie(cookieName) {
 @media all and (min-width:768px) {
 
 
- /* ÀÌ¹ÌÁö ¼­Ä¡¿ë */
+ /* ì´ë¯¸ì§€ ì„œì¹˜ìš© */
 .sch_imglist_test li{width:50%;}
 .sch_imglist_test li a{width: 90%;margin: 0 auto;}
 
@@ -997,82 +998,82 @@ function getSearchCookie(cookieName) {
 	<input type="hidden" id="searchArea" name="searchArea" value="<%=searchArea %>">
 	
 	<fieldset>
-		<legend>ÅëÇÕ°Ë»ö</legend>
+		<legend>í†µí•©ê²€ìƒ‰</legend>
 		<span class="sch_bar"> 
 			<select id="menu" name="menu" class="sch_sel">
-				<option value="all" <%if (menu.equals("all")) {%>selected="selected" <%}%>>ÅëÇÕ°Ë»ö</option>
-				<option value="menu" <%if (menu.equals("menu")) {%>selected="selected" <%}%>>¸Ş´º</option>
-				<option value="content" <%if (menu.equals("content")) {%>selected="selected" <%}%>>ÄÜÅÙÃ÷</option>
-				<option value="board" <%if (menu.equals("board")) {%>selected="selected" <%}%>>°Ô½ÃÆÇ</option>
-				<option value="office" <%if (menu.equals("office")) {%>selected="selected" <%}%>>Á÷¿ø/¾÷¹«</option>
-				<option value="file" <%if (menu.equals("file")) {%>selected="selected" <%}%>>ÆÄÀÏ</option>
-				<option value="image" <%if (menu.equals("image")) {%>selected="selected" <%}%>>ÀÌ¹ÌÁö</option>
-				<option value="video" <%if (menu.equals("video")) {%>selected="selected" <%}%>>µ¿¿µ»ó</option>
+				<option value="all" <%if (menu.equals("all")) {%>selected="selected" <%}%>>í†µí•©ê²€ìƒ‰</option>
+				<option value="menu" <%if (menu.equals("menu")) {%>selected="selected" <%}%>>ë©”ë‰´</option>
+				<option value="content" <%if (menu.equals("content")) {%>selected="selected" <%}%>>ì½˜í…ì¸ </option>
+				<option value="board" <%if (menu.equals("board")) {%>selected="selected" <%}%>>ê²Œì‹œíŒ</option>
+				<option value="office" <%if (menu.equals("office")) {%>selected="selected" <%}%>>ì§ì›/ì—…ë¬´</option>
+				<option value="file" <%if (menu.equals("file")) {%>selected="selected" <%}%>>íŒŒì¼</option>
+				<option value="image" <%if (menu.equals("image")) {%>selected="selected" <%}%>>ì´ë¯¸ì§€</option>
+				<option value="video" <%if (menu.equals("video")) {%>selected="selected" <%}%>>ë™ì˜ìƒ</option>
 			</select> 
-			<input type="text" name="searchTerm" class="sch_txt" title="°Ë»ö¾î" value="<%=searchTerm %>">
+			<input type="text" name="searchTerm" class="sch_txt" title="ê²€ìƒ‰ì–´" value="<%=searchTerm %>">
 		</span> 
-		<!-- <button class="sc_btn" id="sc_btn" >°Ë»ö</button> --> 
-		<input type="submit" class="sc_btn" id="sc_btn" value="°Ë»ö">
+		<!-- <button class="sc_btn" id="sc_btn" >ê²€ìƒ‰</button> --> 
+		<input type="submit" class="sc_btn" id="sc_btn" value="ê²€ìƒ‰">
 		<span class="sch_schin" > 
-			<input type="checkbox" id="sch_in" name="re_searchCheck"> <label for="sch_in">°á°ú³»°Ë»ö</label>
+			<input type="checkbox" id="sch_in" name="re_searchCheck"> <label for="sch_in">ê²°ê³¼ë‚´ê²€ìƒ‰</label>
 		</span>
 	</fieldset>
 	
-	<!-- »ó¼¼°Ë»ö S -->
+	<!-- ìƒì„¸ê²€ìƒ‰ S -->
 	<div class="sch_more">
 		<ul>
-			<li><strong>°Ë»ö¹üÀ§</strong> 
+			<li><strong>ê²€ìƒ‰ë²”ìœ„</strong> 
 				<input type="checkbox" name="sco" id="sch" value="all"  onclick="fn_area_check('all')">
-				<label for="sch_sco1">ÀüÃ¼</label> <input type="checkbox" name="sco" id="sch_sco2" value="title"   onclick="fn_area_check('title')">
-				<label for="sch_sco2">Á¦¸ñ</label> <input type="checkbox" name="sco" id="sch_sco3" value="content"   onclick="fn_area_check('content')">
-				<label for="sch_sco3">º»¹®</label> <input type="checkbox" name="sco" id="sch_sco4" value="fileName"   onclick="fn_area_check('fileName')">
-				<label for="sch_sco4">ÆÄÀÏ¸í</label> <input type="checkbox" name="sco" id="sch_sco5" value="fileContent"   onclick="fn_area_check('fileContent')">
-				<label for="sch_sco5">ÆÄÀÏ³»¿ë</label>
+				<label for="sch_sco1">ì „ì²´</label> <input type="checkbox" name="sco" id="sch_sco2" value="title"   onclick="fn_area_check('title')">
+				<label for="sch_sco2">ì œëª©</label> <input type="checkbox" name="sco" id="sch_sco3" value="content"   onclick="fn_area_check('content')">
+				<label for="sch_sco3">ë³¸ë¬¸</label> <input type="checkbox" name="sco" id="sch_sco4" value="fileName"   onclick="fn_area_check('fileName')">
+				<label for="sch_sco4">íŒŒì¼ëª…</label> <input type="checkbox" name="sco" id="sch_sco5" value="fileContent"   onclick="fn_area_check('fileContent')">
+				<label for="sch_sco5">íŒŒì¼ë‚´ìš©</label>
 			</li>
 		</ul>
 	</div>
-	<!-- »ó¼¼°Ë»ö e -->
+	<!-- ìƒì„¸ê²€ìƒ‰ e -->	
 	</form>
 </div>
-<!-- °Ë»ö e -->
-<!-- ÅÇ s -->
+<!-- ê²€ìƒ‰ e -->
+<!-- íƒ­ s -->
 <div class="basic_tab sch_tab">
 	<ul>
-		<li class="tab_tit"><a href="#" menu="all" onclick="javascript:p_menu('all'); return false;">ÅëÇÕ°Ë»ö</a></li>
-		<li class="tab_tit"><a href="#" menu="menu" onclick="javascript:p_menu('menu'); return false;">¸Ş´º</a></li>
-		<li class="tab_tit"><a href="#" menu="content" onclick="javascript:p_menu('content'); return false;">ÄÜÅÙÃ÷</a></li>
-		<li class="tab_tit"><a href="#" menu="board" onclick="javascript:p_menu('board'); return false;">°Ô½ÃÆÇ</a></li>
-		<li class="tab_tit"><a href="#" menu="office" onclick="javascript:p_menu('office'); return false;">Á÷¿ø/¾÷¹«</a></li>
-		<li class="tab_tit"><a href="#" menu="file" onclick="javascript:p_menu('file'); return false;">ÆÄÀÏ</a></li>
-		<li class="tab_tit"><a href="#" menu="image" onclick="javascript:p_menu('image'); return false;">ÀÌ¹ÌÁö</a></li>
-		<li class="tab_tit"><a href="#" menu="video" onclick="javascript:p_menu('video'); return false;">µ¿¿µ»ó</a></li>
+		<li class="tab_tit"><a href="#" menu="all" onclick="javascript:p_menu('all'); return false;">í†µí•©ê²€ìƒ‰</a></li>
+		<li class="tab_tit"><a href="#" menu="menu" onclick="javascript:p_menu('menu'); return false;">ë©”ë‰´</a></li>
+		<li class="tab_tit"><a href="#" menu="content" onclick="javascript:p_menu('content'); return false;">ì½˜í…ì¸ </a></li>
+		<li class="tab_tit"><a href="#" menu="board" onclick="javascript:p_menu('board'); return false;">ê²Œì‹œíŒ</a></li>
+		<li class="tab_tit"><a href="#" menu="office" onclick="javascript:p_menu('office'); return false;">ì§ì›/ì—…ë¬´</a></li>
+		<li class="tab_tit"><a href="#" menu="file" onclick="javascript:p_menu('file'); return false;">íŒŒì¼</a></li>
+		<li class="tab_tit"><a href="#" menu="image" onclick="javascript:p_menu('image'); return false;">ì´ë¯¸ì§€</a></li>
+		<li class="tab_tit"><a href="#" menu="video" onclick="javascript:p_menu('video'); return false;">ë™ì˜ìƒ</a></li>
 	</ul>
 </div>
-<!-- ÅÇ e -->
+<!-- íƒ­ e -->
 
-<!-- °Ë»ö°á°ú s -->
+<!-- ê²€ìƒ‰ê²°ê³¼ s -->
 <div class="sch_con">
 
 <div class="sch_left">
 <% 
 if (totalSize == 0) { 
 %>
-<!-- °Ë»ö°á°ú ¾øÀ½ s -->
+<!-- ê²€ìƒ‰ê²°ê³¼ ì—†ìŒ s -->
 <div class="sch_box">
-	<p>°Ë»ö°á°ú¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.</p>
+	<p>ê²€ìƒ‰ê²°ê³¼ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.</p>
 	<ul>
-		<li>´Ü¾îÀÇ Ã¶ÀÚ°¡ Á¤È®ÇÑ Áö È®ÀÎÇØÁÖ¼¼¿ä.</li>
-		<li>º¸´Ù ÀÏ¹İÀûÀÎ ´Ü¾î·Î °Ë»öÇØº¸¼¼¿ä.</li>
+		<li>ë‹¨ì–´ì˜ ì² ìê°€ ì •í™•í•œ ì§€ í™•ì¸í•´ì£¼ì„¸ìš”.</li>
+		<li>ë³´ë‹¤ ì¼ë°˜ì ì¸ ë‹¨ì–´ë¡œ ê²€ìƒ‰í•´ë³´ì„¸ìš”.</li>
 	</ul>
 </div>
-<!-- °Ë»ö°á°ú ¾øÀ½ e -->
+<!-- ê²€ìƒ‰ê²°ê³¼ ì—†ìŒ e -->
 <% 
 } else { 
 %>
-<!-- °Ë»ö°á°ú s -->
+<!-- ê²€ìƒ‰ê²°ê³¼ s -->
 <div class="sch_result">
 	<p>
-		°Ë»ö¾î 
+		ê²€ìƒ‰ì–´ 
 <%
 	String[] searchTermArr = re_searchTerm.split("#,#");
 
@@ -1083,24 +1084,24 @@ if (totalSize == 0) {
 <%
 	}
 %>
-		¿¡ ´ëÇÑ ÃÑ <strong><%=totalSize %>°Ç</strong>ÀÇ
-		°Ë»ö°á°ú¸¦ Ã£¾Ò½À´Ï´Ù.
+		ì— ëŒ€í•œ ì´ <strong><%=totalSize %>ê±´</strong>ì˜
+		ê²€ìƒ‰ê²°ê³¼ë¥¼ ì°¾ì•˜ìŠµë‹ˆë‹¤.
 	</p>
 </div>
-<!-- °Ë»ö°á°ú e -->
+<!-- ê²€ìƒ‰ê²°ê³¼ e -->
 <% 
 } 
 %>
-<!--=================================================¸Ş´º===================================================================================  -->
+<!--=================================================ë©”ë‰´===================================================================================  -->
 <div class="sch_col">
 <%
 if (menuSize > 0) {
 	if (menu.equals("all")) {
 %>
 <div class="tit">
-<h4>¸Ş´º</h4>
+<h4>ë©”ë‰´</h4>
 <p class="num">
-°Ë»ö°á°ú ÃÑ <strong><%=menuSize %></strong>°Ç
+ê²€ìƒ‰ê²°ê³¼ ì´ <strong><%=menuSize %></strong>ê±´
 </p>
 </div>
 <%
@@ -1117,7 +1118,7 @@ if (menuSize > 0) {
 %>
 <ul class="sch_pagelist">
 	<li>
-		<a href="<%=URL %>"	target="_blank" title="»õÃ¢¿­¸²"><strong><%=FULL_NM %></strong></a>
+		<a href="<%=URL %>"	target="_blank" title="ìƒˆì°½ì—´ë¦¼"><strong><%=FULL_NM %></strong></a>
 	</li>
 </ul>
 <%
@@ -1126,7 +1127,7 @@ if (menuSize > 0) {
 	if (menu.equals("all")) {
 %>
 <p class="more">
-<a href="#" onclick="p_menu('menu'); return false;">¸Ş´º °á°ú ´õº¸±â</a>
+<a href="#" onclick="p_menu('menu'); return false;">ë©”ë‰´ ê²°ê³¼ ë”ë³´ê¸°</a>
 </p>
 <%
 	}
@@ -1140,16 +1141,16 @@ if (menuSize > 0) {
 %>
 </div>
 
-<!--=================================================ÄÜÅÙÃ÷===================================================================================  -->
+<!--=================================================ì½˜í…ì¸ ===================================================================================  -->
 <div class="sch_col">
 <%
 if (contentSize > 0) {
 	if (menu.equals("all")) {
 %>
 <div class="tit">
-<h4>ÄÜÅÙÃ÷</h4>
+<h4>ì½˜í…ì¸ </h4>
 <p class="num">
-°Ë»ö°á°ú ÃÑ <strong><%=contentSize %></strong>°Ç
+ê²€ìƒ‰ê²°ê³¼ ì´ <strong><%=contentSize %></strong>ê±´
 </p>
 </div>
 <%
@@ -1168,7 +1169,7 @@ if (contentSize > 0) {
 %>
 <ul class="sch_conlist">
 	<li>
-		<strong><a href="<%=URL %>" target="_blank" title="»õÃ¢¿­¸²"><%=MENU_NM %></a></strong>
+		<strong><a href="<%=URL %>" target="_blank" title="ìƒˆì°½ì—´ë¦¼"><%=MENU_NM %></a></strong>
 		<span><%=CONTENTS_CONTENT %></span>
 		<span class="sch_local"><%=FULL_NM %></span>
 	</li>
@@ -1179,7 +1180,7 @@ if (contentSize > 0) {
 	if (menu.equals("all")) {
 %>
 <p class="more">
-<a href="#" onclick="p_menu('content'); return false;">ÄÜÅÙÃ÷ °á°ú ´õº¸±â</a>
+<a href="#" onclick="p_menu('content'); return false;">ì½˜í…ì¸  ê²°ê³¼ ë”ë³´ê¸°</a>
 </p>
 <%
 	}
@@ -1193,16 +1194,16 @@ if (contentSize > 0) {
 %>
 </div>
 
-<!--=================================================°Ô½ÃÆÇ===================================================================================  -->
+<!--=================================================ê²Œì‹œíŒ===================================================================================  -->
 <div class="sch_col">
 <%
 if (bbsSize > 0) {
 	if (menu.equals("all")) {
 %>
 <div class="tit">
-<h4>°Ô½ÃÆÇ</h4>
+<h4>ê²Œì‹œíŒ</h4>
 <p class="num">
-°Ë»ö°á°ú ÃÑ <strong><%=bbsSize %></strong>°Ç
+ê²€ìƒ‰ê²°ê³¼ ì´ <strong><%=bbsSize %></strong>ê±´
 </p>
 </div>
 <%
@@ -1222,7 +1223,7 @@ if (bbsSize > 0) {
 %>
 <ul class="sch_conlist">
 	<li>
-		<strong><a href="<%=URL %>" target="_blank" title="»õÃ¢¿­¸²"><%=DATA_TITLE %></a></strong>
+		<strong><a href="<%=URL %>" target="_blank" title="ìƒˆì°½ì—´ë¦¼"><%=DATA_TITLE %></a></strong>
 		<span><%=DATA_CONTENT %></span>
 		<span class="sch_local"><%=FULL_NM %></span>
 	</li>
@@ -1233,7 +1234,7 @@ if (bbsSize > 0) {
 	if (menu.equals("all")) {
 %>
 <p class="more">
-<a href="#" onclick="p_menu('board'); return false;">°Ô½ÃÆÇ °á°ú ´õº¸±â</a>
+<a href="#" onclick="p_menu('board'); return false;">ê²Œì‹œíŒ ê²°ê³¼ ë”ë³´ê¸°</a>
 </p>
 <%
 	}
@@ -1247,16 +1248,16 @@ if (bbsSize > 0) {
 %>
 </div>
 
-<!--=================================================Á÷¿ø/¾÷¹«===================================================================================  -->
+<!--=================================================ì§ì›/ì—…ë¬´===================================================================================  -->
 <div class="sch_col">
 <%
 if (officeSize > 0) {
 	if (menu.equals("all")) {
 %>
 <div class="tit">
-<h4>Á÷¿ø/¾÷¹«</h4>
+<h4>ì§ì›/ì—…ë¬´</h4>
 <p class="num">
-°Ë»ö°á°ú ÃÑ <strong><%=officeSize %></strong>°Ç
+ê²€ìƒ‰ê²°ê³¼ ì´ <strong><%=officeSize %></strong>ê±´
 </p>
 </div>
 <%
@@ -1269,16 +1270,16 @@ if (officeSize > 0) {
 <div class="over_table">
 	<table class="basic_table">
 		<caption>
-			<strong>Á÷¿ø/¾÷¹«</strong> ºÎ¼­, Á÷À§, ¼º¸í, ´ã´ç¾÷¹«, ÀüÈ­¹øÈ£ Á¤º¸ Á¦°ø
+			<strong>ì§ì›/ì—…ë¬´</strong> ë¶€ì„œ, ì§ìœ„, ì„±ëª…, ë‹´ë‹¹ì—…ë¬´, ì „í™”ë²ˆí˜¸ ì •ë³´ ì œê³µ
 		</caption>
 		<thead>
 			<tr>
-				<th scope="col">ºÎ¼­</th>
-				<!-- <th scope="col">Á÷À§</th> -->
-				<th scope="col">¼º¸í</th>
-				<th scope="col">´ã´ç¾÷¹«</th>
-				<th scope="col">ÀüÈ­¹øÈ£</th>
-				<!-- <th scope="col">ÀüÈ­¹øÈ£</th> -->
+				<th scope="col">ë¶€ì„œ</th>
+				<!-- <th scope="col">ì§ìœ„</th> -->
+				<th scope="col">ì„±ëª…</th>
+				<th scope="col">ë‹´ë‹¹ì—…ë¬´</th>
+				<th scope="col">ì „í™”ë²ˆí˜¸</th>
+				<!-- <th scope="col">ì „í™”ë²ˆí˜¸</th> -->
 			</tr>
 		</thead>
 		<tbody>
@@ -1294,7 +1295,7 @@ if (officeSize > 0) {
 %>
 			<tr>
 				<td><%=OFFICE_FULL_NM %></td>
-				<!-- <td>ÁÖ¹«°ü</td> -->
+				<!-- <td>ì£¼ë¬´ê´€</td> -->
 				<td><%=USER_NM %></td>
 				<td class="txt_left"><%=OFFICE_PT_MEMO %></td>
 				<td><%=OFFICE_TEL %></td>
@@ -1310,7 +1311,7 @@ if (officeSize > 0) {
 	if (menu.equals("all")) {
 %>
 <p class="more">
-<a href="#" onclick="p_menu('office'); return false;">Á÷¿ø/¾÷¹« °á°ú ´õº¸±â</a>
+<a href="#" onclick="p_menu('office'); return false;">ì§ì›/ì—…ë¬´ ê²°ê³¼ ë”ë³´ê¸°</a>
 </p>
 <%
 	}
@@ -1324,16 +1325,16 @@ if (officeSize > 0) {
 %>
 </div>
 
-<!--=================================================ÆÄÀÏ===================================================================================  -->
+<!--=================================================íŒŒì¼===================================================================================  -->
 <div class="sch_col">
 <%
 if (fileSize > 0) {
 	if (menu.equals("all")) {
 %>
 <div class="tit">
-<h4>ÆÄÀÏ</h4>
+<h4>íŒŒì¼</h4>
 <p class="num">
-°Ë»ö°á°ú ÃÑ <strong><%=fileSize %></strong>°Ç
+ê²€ìƒ‰ê²°ê³¼ ì´ <strong><%=fileSize %></strong>ê±´
 </p>
 </div>
 <%
@@ -1358,8 +1359,8 @@ if (fileSize > 0) {
 %>
 <ul class="sch_conlist">
 	<li>
-		<strong><a href="<%=URL %>" target="_blank" title="»õÃ¢¿­¸²"><%=FILE_NAME %></a></strong>
-		<a href="<%=FILE_PATH %>" class="sbtn_down"><span>´Ù¿î·Îµå</span></a>
+		<strong><a href="<%=URL %>" target="_blank" title="ìƒˆì°½ì—´ë¦¼"><%=FILE_NAME %></a></strong>
+		<a href="<%=FILE_PATH %>" class="sbtn_down"><span>ë‹¤ìš´ë¡œë“œ</span></a>
 		<span class="sch_local"><%=FULL_NM %></span>
 	</li>
 </ul>
@@ -1369,34 +1370,34 @@ if (fileSize > 0) {
 	if (menu.equals("all")) {
 %>
 <p class="more">
-<a href="#" onclick="p_menu('file'); return false;">ÆÄÀÏ °á°ú ´õº¸±â</a>
+<a href="#" onclick="p_menu('file'); return false;">íŒŒì¼ ê²°ê³¼ ë”ë³´ê¸°</a>
 </p>
 <%
 	}
 	
 	if (!pageNaviStr.equals("")) {
 %>
-<!-- ÆäÀÌÂ¡ Ã³¸® ÇØ¾ß ÇÒ ºÎºĞ -->
+<!-- í˜ì´ì§• ì²˜ë¦¬ í•´ì•¼ í•  ë¶€ë¶„ -->
 <div class="paging" align="center">
 <%=pageNaviStr %>
 </div>
-<!--  ÆäÀÌÂ¡ Ã³¸® ³¡ -->
+<!--  í˜ì´ì§• ì²˜ë¦¬ ë -->
 <%
 	}
 }
 %>
 </div>
 
-<!--=================================================ÀÌ¹ÌÁö===================================================================================  -->
+<!--=================================================ì´ë¯¸ì§€===================================================================================  -->
 <div class="sch_col">
 <%
 if (imgSize > 0) {
 	if (menu.equals("all")) {
 %>
 <div class="tit">
-<h4>ÀÌ¹ÌÁö</h4>
+<h4>ì´ë¯¸ì§€</h4>
 <p class="num">
-°Ë»ö°á°ú ÃÑ <strong><%=imgSize %></strong>°Ç
+ê²€ìƒ‰ê²°ê³¼ ì´ <strong><%=imgSize %></strong>ê±´
 </p>
 </div>
 <%
@@ -1426,8 +1427,8 @@ if (imgSize > 0) {
  <div style="float:left; margin-right: 10px" > 
 <ul class="sch_imglist_test" >
 	<li >
-		<a href="<%=URL %>" target="_blank" title="»õÃ¢¿­¸²">
-			<img src="/images/bbs/no_img.gif" alt="Å×½ºÆ®Áß." onerror="this.src='http://imsil-www.skoinfo.co.kr/images/bbs/no_img.gif';"/> <span><strong><%=FILE_NAME %></strong><%=REGISTER_DT %></span>
+		<a href="<%=URL %>" target="_blank" title="ìƒˆì°½ì—´ë¦¼">
+			<img src="/images/bbs/no_img.gif" alt="í…ŒìŠ¤íŠ¸ì¤‘." onerror="this.src='http://imsil-www.skoinfo.co.kr/images/bbs/no_img.gif';"/> <span><strong><%=FILE_NAME %></strong><%=REGISTER_DT %></span>
 		</a>
 	</li>
 </ul>
@@ -1459,8 +1460,8 @@ if (imgSize > 0) {
  <div style="float: left; visibility: hidden;">
 	<ul class="sch_imglist_test" >
 		<li >
-			<a href="" target="_blank" title="»õÃ¢¿­¸²">
-				<img src="/images/bbs/no_img.gif" alt="Å×½ºÆ®Áß." onerror="this.src='http://imsil-www.skoinfo.co.kr/images/bbs/no_img.gif';"/> <span><strong><%=FILE_NAME %></strong><%=REGISTER_DT %></span>
+			<a href="" target="_blank" title="ìƒˆì°½ì—´ë¦¼">
+				<img src="/images/bbs/no_img.gif" alt="í…ŒìŠ¤íŠ¸ì¤‘." onerror="this.src='http://imsil-www.skoinfo.co.kr/images/bbs/no_img.gif';"/> <span><strong><%=FILE_NAME %></strong><%=REGISTER_DT %></span>
 			</a>
 		</li>
 	</ul>
@@ -1475,7 +1476,7 @@ if (imgSize > 0) {
 	if (menu.equals("all")) {
 %>
 <p class="more" style="width: 619px;">
-<a href="#" onclick="p_menu('image'); return false;">ÀÌ¹ÌÁö °á°ú ´õº¸±â</a>
+<a href="#" onclick="p_menu('image'); return false;">ì´ë¯¸ì§€ ê²°ê³¼ ë”ë³´ê¸°</a>
 </p>
 <%
 	}
@@ -1485,16 +1486,16 @@ if (imgSize > 0) {
 %>
 </div>
 
-<!--=================================================µ¿¿µ»ó===================================================================================  -->
+<!--=================================================ë™ì˜ìƒ===================================================================================  -->
 <div class="sch_col">
 <%
 if (movSize > 0) {
 	if (menu.equals("all")) {
 %>
 <div class="tit">
-<h4>µ¿¿µ»ó</h4>
+<h4>ë™ì˜ìƒ</h4>
 <p class="num">
-°Ë»ö°á°ú ÃÑ <strong><%=movSize %></strong>°Ç
+ê²€ìƒ‰ê²°ê³¼ ì´ <strong><%=movSize %></strong>ê±´
 </p>
 </div>
 <%
@@ -1520,8 +1521,8 @@ if (movSize > 0) {
 <div style="float:left; margin-right: 10px" >
 <ul class="sch_imglist_test" >
 	<li>
-		<a href="<%=URL %>" target="_blank" title="»õÃ¢¿­¸²">
-			<img src="/images/bbs/no_img.gif" alt="Å×½ºÆ®Áß." onerror="this.src='http://imsil-www.skoinfo.co.kr/images/bbs/no_img.gif';"/> <span><strong><%=FILE_NAME %></strong><%=REGISTER_DT %></span>
+		<a href="<%=URL %>" target="_blank" title="ìƒˆì°½ì—´ë¦¼">
+			<img src="/images/bbs/no_img.gif" alt="í…ŒìŠ¤íŠ¸ì¤‘." onerror="this.src='http://imsil-www.skoinfo.co.kr/images/bbs/no_img.gif';"/> <span><strong><%=FILE_NAME %></strong><%=REGISTER_DT %></span>
 		</a>
 	</li>
 </ul>
@@ -1548,8 +1549,8 @@ if (movSize > 0) {
  <div style="float: left; visibility: hidden;">
 	<ul class="sch_imglist_test" >
 		<li >
-			<a href="" target="_blank" title="»õÃ¢¿­¸²">
-				<img src="/images/bbs/no_img.gif" alt="Å×½ºÆ®Áß." onerror="this.src='http://imsil-www.skoinfo.co.kr/images/bbs/no_img.gif';"/> <span><strong><%=FILE_NAME %></strong><%=REGISTER_DT %></span>
+			<a href="" target="_blank" title="ìƒˆì°½ì—´ë¦¼">
+				<img src="/images/bbs/no_img.gif" alt="í…ŒìŠ¤íŠ¸ì¤‘." onerror="this.src='http://imsil-www.skoinfo.co.kr/images/bbs/no_img.gif';"/> <span><strong><%=FILE_NAME %></strong><%=REGISTER_DT %></span>
 			</a>
 		</li>
 	</ul>
@@ -1564,7 +1565,7 @@ if (movSize > 0) {
 	if (menu.equals("all")) {
 %>
 <p class="more">
-<a href="#" onclick="p_menu('video'); return false;">µ¿¿µ»ó °á°ú ´õº¸±â</a>
+<a href="#" onclick="p_menu('video'); return false;">ë™ì˜ìƒ ê²°ê³¼ ë”ë³´ê¸°</a>
 </p>
 <%
 	}
@@ -1580,22 +1581,22 @@ if (movSize > 0) {
 
 <%if (!pageNaviStr.equals("")) {
 %>
-<!-- ÆäÀÌÂ¡ Ã³¸® ÇØ¾ß ÇÒ ºÎºĞ -->
+<!-- í˜ì´ì§• ì²˜ë¦¬ í•´ì•¼ í•  ë¶€ë¶„ -->
 <div class="paging" align="center" >
 <%=pageNaviStr %>
 </div>
-<!--  ÆäÀÌÂ¡ Ã³¸® ³¡ -->
+<!--  í˜ì´ì§• ì²˜ë¦¬ ë -->
 <%
 	}
 %>
-<!-- ====================================================°Ë»ö ¿ŞÂÊ ³¡===================================================================== -->		
+<!-- ====================================================ê²€ìƒ‰ ì™¼ìª½ ë===================================================================== -->		
 </div>	
 		
 <div class="sch_right">
-	<!-- ÀÎ±â°Ë»ö¾î s -->
+	<!-- ì¸ê¸°ê²€ìƒ‰ì–´ s -->
 	<div class="best_sch">
 	<h4>
-	<span>ÀÎ±â</span> °Ë»ö¾î
+	<span>ì¸ê¸°</span> ê²€ìƒ‰ì–´
 	</h4>
 	<% 
 		if(hotList.size() > 0) { 
@@ -1619,26 +1620,26 @@ if (movSize > 0) {
 		} 
 	%>
 	</div>
-	<!-- ÀÎ±â°Ë»ö¾î e -->
-	<!-- ³»°¡Ã£Àº °Ë»ö¾î s -->
+	<!-- ì¸ê¸°ê²€ìƒ‰ì–´ e -->
+	<!-- ë‚´ê°€ì°¾ì€ ê²€ìƒ‰ì–´ s -->
 	
 	
 	<div class="my_sch">
 		<h4>
-		<span>³»°¡ Ã£Àº</span> °Ë»ö¾î
+		<span>ë‚´ê°€ ì°¾ì€</span> ê²€ìƒ‰ì–´
 		</h4>
 		
 		<ul id="recent">
 		<!-- 
-		<li><a href="">ÀÏÀÚ¸®</a></li>
-		<li><a href="">ÀÎ»ç</a></li>
-		<li><a href="">°Ë»ö¾î</a></li>
+		<li><a href="">ì¼ìë¦¬</a></li>
+		<li><a href="">ì¸ì‚¬</a></li>
+		<li><a href="">ê²€ìƒ‰ì–´</a></li>
 		-->
 		</ul>
 	</div>
-	<!-- ³»°¡Ã£Àº °Ë»ö¾î e -->
+	<!-- ë‚´ê°€ì°¾ì€ ê²€ìƒ‰ì–´ e -->
 </div>
-<!-- ====================================================°Ë»ö ³¡===================================================================== -->		
+<!-- ====================================================ê²€ìƒ‰ ë===================================================================== -->		
 </div>	
 
 <form action="/index.imsil?menuCd=DOM_000000107007000000" name="p_menu_tap" method="get">
