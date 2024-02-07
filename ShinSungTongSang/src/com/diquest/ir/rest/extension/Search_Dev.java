@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-public class Search implements QuerySetExtension, ResultJsonExtension {
+public class Search_Dev implements QuerySetExtension, ResultJsonExtension {
 
 	@Override
 	public void init() {
@@ -102,10 +102,8 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		String otltyn = SearchUtil.get("otltyn") != null ? SearchUtil.get("otltyn") : ""; // 아울렛체크
 		String rprstGodYn  = SearchUtil.get("rprstGodYn") != null ? SearchUtil.get("rprstGodYn") : ""; // 카데고리 대표상품 여부 체크
 		String soldoutYn  = SearchUtil.get("soldoutYn") != null ? SearchUtil.get("soldoutYn") : ""; //
-		String fltrYn  = SearchUtil.get("fltrYn") != null ? SearchUtil.get("fltrYn") : ""; //
-		String researchYn  = SearchUtil.get("researchYn") != null ? SearchUtil.get("researchYn") : ""; //
 
-			System.out.println("::::fltrYn::::\n"+fltrYn + "::::researchYn>>"+researchYn);	
+		
 		
 		if ((!sch.equals("") && resch.equals("Y") )) {
 			if(schlist.indexOf(sch) >1) {
@@ -117,6 +115,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 			schlist = sch;
 		}
 		
+		//System.out.println("1. schlist>>>>>>>>>>>"+schlist);
 		int page2 = Integer.parseInt(currentPage);
 		int page3 = Integer.parseInt(perDiv);
 		int startPage = (page2 - 1) * page3; // 0 60
@@ -150,50 +149,75 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		SearchUtil.put("otltyn", otltyn);
 		SearchUtil.put("rprstGodYn", rprstGodYn);
 		SearchUtil.put("soldoutYn", soldoutYn);
+		
 		//QueryParser queryParser = new QueryParser();
 
 		Query query = new Query(startTag, endTag);
 		query.setResult(startPage, endPage);
 		query.setDebug(true);
 		query.setPrintQuery(true);
-		//if (!sch.equals("") && (fltrYn.equals("N") && researchYn.equals("N"))) {
-		//	query.setLoggable(true);
-		//	query.setLogKeyword(sch.toCharArray());
-		//}
-
 		if (!sch.equals("")) {
 			query.setLoggable(true);
 			query.setLogKeyword(sch.toCharArray());
-
-			if (fltrYn.equals("Y") || researchYn.equals("Y")) {
-				query.setLoggable(false);
-			}
 		}
 
-		if (queryCheck == 1) {
-			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING|Protocol.RankingOption.DOCUMENT_RANKING));
-			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
-			if(schgubun.equals("total")||schgubun.equals("category")){
-				query.setGroupBy(groupSet_fn(SearchUtil, queryCheck));
-				if (setKeywordCheck(sch)) {
-					query.setResultModifier("typo");
-					query.setValue("typo-parameters", sch);
-					query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
-					query.setValue("typo-correct-result-num", "1");
+		
+		
+		// 개발은 testgubun 구분이 있고 
+		// 운영은 없음  
+		
+		if(testgubun.equals("dev")) {
+			if (queryCheck == 1) {
+				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING|Protocol.RankingOption.DOCUMENT_RANKING));
+				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
+				if(schgubun.equals("total")||schgubun.equals("category")){
+					query.setGroupBy(groupSet_fn(SearchUtil, queryCheck));
+					if (setKeywordCheck(sch)) {
+						query.setResultModifier("typo");
+						query.setValue("typo-parameters", sch);
+						query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
+						query.setValue("typo-correct-result-num", "1");
+					}
+					if (!price01.equals("") && !price02.equals("")) {
+						query.setFilter(fileterSet_fn(SearchUtil));
+					}
 				}
-				if (!price01.equals("") && !price02.equals("")) {
-					query.setFilter(fileterSet_fn(SearchUtil));
-				}
+				query.setQueryModifier("diver");				
+				query.setFrom("MAIN");
+				
 			}
-			query.setQueryModifier("diver");				
-			query.setFrom("MAIN");
-			
-		}
-		if (queryCheck == 2) {
-			query.setFrom("BRAND");
-		}
-		if (queryCheck == 3) {
-			query.setFrom("PLN_ENT");
+			if (queryCheck == 2) {
+				query.setFrom("BRAND");
+			}
+			if (queryCheck == 3) {
+				query.setFrom("PLN_ENT");
+			}
+		}else if(testgubun.equals("stg")) {
+			if (queryCheck == 1) {
+				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING));
+				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
+				if(schgubun.equals("total")||schgubun.equals("category")){
+					query.setGroupBy(groupSet_fn(SearchUtil, queryCheck));
+					if (setKeywordCheck(sch)) {
+						query.setResultModifier("typo");
+						query.setValue("typo-parameters", sch);
+						query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
+						query.setValue("typo-correct-result-num", "1");
+					}
+					if (!price01.equals("") && !price02.equals("")) {
+						query.setFilter(fileterSet_fn(SearchUtil));
+					}
+				}
+				query.setQueryModifier("diver");				
+				query.setFrom("STG_MAIN");
+				
+			}
+			if (queryCheck == 2) {
+				query.setFrom("STG_BRAND");
+			}
+			if (queryCheck == 3) {
+				query.setFrom("STG_PLN_ENT");
+			}
 		}
 			
 		query.setSelect(selectSet_fn(SearchUtil, queryCheck));
@@ -244,7 +268,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					new GroupBySet("GROUP_MAX_PRICE",(byte) (Protocol.GroupBySet.OP_INT_MAX | Protocol.GroupBySet.ORDER_COUNT), "DESC 0 0", "","FILTER_DQ_PRICE"), // 최대가격
 					new GroupBySet("GROUP_DQ_EN_BRAND",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "ASC", ""), // 브랜드명
 					new GroupBySet("GROUP_DQ_KOR_BRAND",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "ASC", ""), // 브랜드
-					new GroupBySet("GROUP_DQ_SIZE",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "ASC", ""), // 사이즈
+					new GroupBySet("GROUP_DQ_SIZE",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "DESC", ""), // 사이즈
 					new GroupBySet("GROUP_DQ_STYLE",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "ASC", ""), // 스타일
 			};
 		} 
@@ -256,26 +280,26 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		// 정렬기준 ---->신상품순-----> 상품명--->
 		if (queryCheck == 3) {
 			orderBySet = new OrderBySet[] {
-					new OrderBySet(true, "SORT_DSP_BEG_DT", Protocol.OrderBySet.OP_PREWEIGHT) }; // 전시일시
+					new OrderBySet(true, "SORT_DSP_BEG_DT", Protocol.OrderBySet.OP_POSTWEIGHT) }; // 전시일시
 		} else if (queryCheck == 1) {
 			if (SearchUtil.get("order").equals("BST")) {
 				orderBySet = new OrderBySet[] {
-						new OrderBySet(true, "SORT_BST_GOD_SORT_SEQ", Protocol.OrderBySet.OP_PREWEIGHT) }; // 인기순
+						new OrderBySet(true, "SORT_BST_GOD_SORT_SEQ", Protocol.OrderBySet.OP_POSTWEIGHT) }; // 인기순
 			} else if (SearchUtil.get("order").equals("NEW")) {
 				orderBySet = new OrderBySet[] {
-						new OrderBySet(true, "SORT_NEW_GOD_DSP_DT", Protocol.OrderBySet.OP_PREWEIGHT) }; // 신상품순
+						new OrderBySet(true, "SORT_NEW_GOD_DSP_DT", Protocol.OrderBySet.OP_POSTWEIGHT) }; // 신상품순
 			} else if (SearchUtil.get("order").equals("LAST")) {
 				orderBySet = new OrderBySet[] {
-						new OrderBySet(true, "SORT_DQ_PRICE", Protocol.OrderBySet.OP_PREWEIGHT) }; // 낮은가격순
+						new OrderBySet(true, "SORT_DQ_PRICE", Protocol.OrderBySet.OP_POSTWEIGHT) }; // 낮은가격순
 			} else if (SearchUtil.get("order").equals("HIGH")) {
 				orderBySet = new OrderBySet[] {
-						new OrderBySet(true, "SORT_HIGH_SALE_PRC", Protocol.OrderBySet.OP_PREWEIGHT) }; // 높은가격순
+						new OrderBySet(true, "SORT_HIGH_SALE_PRC", Protocol.OrderBySet.OP_POSTWEIGHT) }; // 높은가격순
 			} else if (SearchUtil.get("order").equals("DIC")) {
 				orderBySet = new OrderBySet[] {
-						new OrderBySet(true, "SORT_GOD_DC_RT", Protocol.OrderBySet.OP_PREWEIGHT) }; // 할인율
+						new OrderBySet(true, "SORT_GOD_DC_RT", Protocol.OrderBySet.OP_POSTWEIGHT) }; // 할인율
 			} else if (SearchUtil.get("order").equals("SCORE")) {
 				orderBySet = new OrderBySet[] {
-						new OrderBySet(true, "SORT_EVL_SCORE", Protocol.OrderBySet.OP_PREWEIGHT) }; // 별점순
+						new OrderBySet(true, "SORT_EVL_SCORE", Protocol.OrderBySet.OP_POSTWEIGHT) }; // 별점순
 			} else {
 				orderBySet = new OrderBySet[] {
 						new OrderBySet(true, "SORT_BST_GOD_SORT_SEQ", Protocol.OrderBySet.OP_PREWEIGHT) }; // 가중치
@@ -390,8 +414,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 						whereList.add(new WhereSet("IDX_GOD_NO", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
-						whereList.add(new WhereSet("IDX_SOLDOUT_YN", Protocol.WhereSet.OP_HASALL, "Y", -9999999));
-					
+						whereList.add(new WhereSet("IDX_SOLDOUT_YN", Protocol.WhereSet.OP_HASALL, "Y", -999999));
 					}else if(queryCheck==2) {
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
 						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 0));
@@ -430,6 +453,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					}
 				}
 			}
+			
 		}
 		if(queryCheck==1) {
 			// 카테고리코드 시작
@@ -614,7 +638,6 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					new SelectSet("DQ_COLOR", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("DQ_COLOR2", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("DQ_STYLE2", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DQ_STYLE_SEARCH", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("DQ_PRICE", (byte) (Protocol.SelectSet.NONE)) };
 		} else if (queryCheck == 3) {
 			selectSet = new SelectSet[] {
@@ -682,13 +705,6 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 			int returnCode, HashMap<String, String> responseHeaders) {
 		String checksch = request.getParams().get("sch");
 		String tcgubuncheck = request.getParams().get("tcgubun");
-		String fltrYn = request.getParams().get("fltrYn") != null ? request.getParams().get("fltrYn") : ""; //
-		String researchYn = request.getParams().get("researchYn") != null ? request.getParams().get("researchYn") : ""; //
-		//String fltrYn = SearchUtil.get("fltrYn") != null ? SearchUtil.get("fltrYn") : ""; //
-		//String researchYn = SearchUtil.get("researchYn") != null ? SearchUtil.get("researchYn") : ""; //
-
-		System.out.println("LOG_T::::fltrYn::::\n"+fltrYn + "::::researchYn>>"+researchYn);	
-
 		QueryParser queryParser = new QueryParser();            //QueryParser
 		Query query = null;   
 		Gson gson=new Gson();
@@ -698,9 +714,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 			Result[] resultList = resultSet.getResultList();
 			if (resultList.length >= 2) {
 				int totalcheck = resultList[0].getTotalSize();
-				if(!"".equals(checksch) && fltrYn.equals("N") && researchYn.equals("N")){
-					setSearchLog(tcgubuncheck, totalcheck, checksch);
-				}
+				setSearchLog(tcgubuncheck, totalcheck, checksch);
 			}
 		}
 		if(returnCode > -100){ 	
@@ -717,8 +731,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					 GroupBySet groupBySet = query.getGroupSelectFields()[j];
 					 JsonObject groupResultObj = groupResultArray.get(j).getAsJsonObject();
 					 String[] groupCheck= groupResultObj.get("ids").toString().split(",");
-					 String[] groupCheck1= groupResultObj.get("ids").toString().split(",");
-				
+					 
 					 if(groupCheck.length>2) {
 						 for (int k = 0; k < groupCheck.length; k++) {
 							 if(groupCheck[k].length()==2 ||groupCheck[k].length()==3) {
@@ -728,7 +741,6 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 								 groupCheckArray1.remove(k);
 							 }
 						 }
-					 
 					 }
 					 groupResultObj.addProperty("field", String.valueOf(groupBySet.getField()));
 					

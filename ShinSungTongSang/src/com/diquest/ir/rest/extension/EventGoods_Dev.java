@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-public class Search implements QuerySetExtension, ResultJsonExtension {
+public class EventGoods_Dev implements QuerySetExtension, ResultJsonExtension {
 
 	@Override
 	public void init() {
@@ -38,29 +38,18 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		QuerySet querySet = null;
 		querySet = new QuerySet(1);
 
-		//컬렉션 나누기
-		int queryCheck = 1;  //main
-		int queryCheck2 = 2; //brand
-		int queryCheck3 = 3; //pln_ent
-
-		Query query01 = null; // 쿼리1
-		Query query02 = null; // 쿼리2
+		
+		Query query01 = null; 
 
 		try {
 			if (schgubun.equals("total")) {
-				querySet = new QuerySet(2);
-				query01 = query_fn(SearchUtil, queryCheck);
-				query02 = query_fn(SearchUtil, queryCheck2);
-				querySet.addQuery(query01);
-				querySet.addQuery(query02);
-			} else if (schgubun.equals("ent")) {
-				query01 = query_fn(SearchUtil, queryCheck3);
+				query01 = query_fn(SearchUtil);
 				querySet.addQuery(query01);
 			} else if (schgubun.equals("category")) {
-				query01 = query_fn(SearchUtil, queryCheck);
+				query01 = query_fn(SearchUtil);
 				querySet.addQuery(query01);
 			} else if (schgubun.equals("shop")) {
-				query01 = query_fn(SearchUtil, queryCheck);
+				query01 = query_fn(SearchUtil);
 				querySet.addQuery(query01);
 			}
 
@@ -75,7 +64,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 	
 	
 
-	private Query query_fn(Map<String, String> SearchUtil, int queryCheck) throws Exception {
+	private Query query_fn(Map<String, String> SearchUtil) throws Exception {
 		
 		String sch = SearchUtil.get("sch") != null ? SearchUtil.get("sch") : ""; // 검색어
 		String currentPage = SearchUtil.get("currentPage") != null ? SearchUtil.get("currentPage") : "1"; // 페이지
@@ -104,8 +93,9 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		String soldoutYn  = SearchUtil.get("soldoutYn") != null ? SearchUtil.get("soldoutYn") : ""; //
 		String fltrYn  = SearchUtil.get("fltrYn") != null ? SearchUtil.get("fltrYn") : ""; //
 		String researchYn  = SearchUtil.get("researchYn") != null ? SearchUtil.get("researchYn") : ""; //
+		String promtNo = SearchUtil.get("promtNo") != null ? SearchUtil.get("promtNo") : "";  // 이벤트 상품
 
-			System.out.println("::::fltrYn::::\n"+fltrYn + "::::researchYn>>"+researchYn);	
+			//System.out.println("::::fltrYn::::\n"+fltrYn + "::::researchYn>>"+researchYn);	
 		
 		if ((!sch.equals("") && resch.equals("Y") )) {
 			if(schlist.indexOf(sch) >1) {
@@ -150,16 +140,13 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		SearchUtil.put("otltyn", otltyn);
 		SearchUtil.put("rprstGodYn", rprstGodYn);
 		SearchUtil.put("soldoutYn", soldoutYn);
+		SearchUtil.put("promtNo", promtNo);
 		//QueryParser queryParser = new QueryParser();
 
 		Query query = new Query(startTag, endTag);
 		query.setResult(startPage, endPage);
 		query.setDebug(true);
 		query.setPrintQuery(true);
-		//if (!sch.equals("") && (fltrYn.equals("N") && researchYn.equals("N"))) {
-		//	query.setLoggable(true);
-		//	query.setLogKeyword(sch.toCharArray());
-		//}
 
 		if (!sch.equals("")) {
 			query.setLoggable(true);
@@ -170,37 +157,48 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 			}
 		}
 
-		if (queryCheck == 1) {
-			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING|Protocol.RankingOption.DOCUMENT_RANKING));
-			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
-			if(schgubun.equals("total")||schgubun.equals("category")){
-				query.setGroupBy(groupSet_fn(SearchUtil, queryCheck));
-				if (setKeywordCheck(sch)) {
-					query.setResultModifier("typo");
-					query.setValue("typo-parameters", sch);
-					query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
-					query.setValue("typo-correct-result-num", "1");
+		if(testgubun.equals("dev")) {
+				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING|Protocol.RankingOption.DOCUMENT_RANKING));
+				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
+				if(schgubun.equals("total")||schgubun.equals("category")){
+					query.setGroupBy(groupSet_fn(SearchUtil));
+					if (setKeywordCheck(sch)) {
+						query.setResultModifier("typo");
+						query.setValue("typo-parameters", sch);
+						query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
+						query.setValue("typo-correct-result-num", "1");
+					}
+					if (!price01.equals("") && !price02.equals("")) {
+						query.setFilter(fileterSet_fn(SearchUtil));
+					}
 				}
-				if (!price01.equals("") && !price02.equals("")) {
-					query.setFilter(fileterSet_fn(SearchUtil));
+				query.setQueryModifier("diver");				
+				query.setFrom("EVT_GOODS");
+				
+		}else if(testgubun.equals("stg")) {
+				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING));
+				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
+				if(schgubun.equals("total")||schgubun.equals("category")){
+					query.setGroupBy(groupSet_fn(SearchUtil));
+					if (setKeywordCheck(sch)) {
+						query.setResultModifier("typo");
+						query.setValue("typo-parameters", sch);
+						query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
+						query.setValue("typo-correct-result-num", "1");
+					}
+					if (!price01.equals("") && !price02.equals("")) {
+						query.setFilter(fileterSet_fn(SearchUtil));
+					}
 				}
-			}
-			query.setQueryModifier("diver");				
-			query.setFrom("MAIN");
-			
-		}
-		if (queryCheck == 2) {
-			query.setFrom("BRAND");
-		}
-		if (queryCheck == 3) {
-			query.setFrom("PLN_ENT");
+				query.setQueryModifier("diver");				
+				query.setFrom("EVT_GOODS");
 		}
 			
-		query.setSelect(selectSet_fn(SearchUtil, queryCheck));
+		query.setSelect(selectSet_fn(SearchUtil));
 		
-		query.setWhere(whereSet_fn(SearchUtil, queryCheck));
+		query.setWhere(whereSet_fn(SearchUtil));
 		
-		query.setOrderby(orderSet_fn(SearchUtil, queryCheck));
+		query.setOrderby(orderSet_fn(SearchUtil));
 		
 		
 		
@@ -226,13 +224,8 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 
 	}
 
-	private GroupBySet[] groupSet_fn(Map<String, String> SearchUtil, int queryCheck) {
+	private GroupBySet[] groupSet_fn(Map<String, String> SearchUtil) {
 		GroupBySet[] GroupBySet = null;
-		if (queryCheck == 3) {
-			GroupBySet = new GroupBySet[] { new GroupBySet("GROUP_DQ_BRAND",
-					(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.OP_COUNT), "ASC", "") // 브랜드 그룹핑
-			};
-		} else if (queryCheck == 1) {
 			GroupBySet = new GroupBySet[] {
 					new GroupBySet("GROUP_DQ_CATEGORY",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "ASC", ""), // 대카테고리
 					new GroupBySet("GROUP_DQ_CATEGORY02",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "ASC", ""), // 중카테고리
@@ -247,17 +240,12 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					new GroupBySet("GROUP_DQ_SIZE",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "ASC", ""), // 사이즈
 					new GroupBySet("GROUP_DQ_STYLE",(byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_NAME), "ASC", ""), // 스타일
 			};
-		} 
 		return GroupBySet;
 	}
 
-	private OrderBySet[] orderSet_fn(Map<String, String> SearchUtil, int queryCheck) {
+	private OrderBySet[] orderSet_fn(Map<String, String> SearchUtil) {
 		OrderBySet[] orderBySet = null;
 		// 정렬기준 ---->신상품순-----> 상품명--->
-		if (queryCheck == 3) {
-			orderBySet = new OrderBySet[] {
-					new OrderBySet(true, "SORT_DSP_BEG_DT", Protocol.OrderBySet.OP_PREWEIGHT) }; // 전시일시
-		} else if (queryCheck == 1) {
 			if (SearchUtil.get("order").equals("BST")) {
 				orderBySet = new OrderBySet[] {
 						new OrderBySet(true, "SORT_BST_GOD_SORT_SEQ", Protocol.OrderBySet.OP_PREWEIGHT) }; // 인기순
@@ -280,15 +268,11 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 				orderBySet = new OrderBySet[] {
 						new OrderBySet(true, "SORT_BST_GOD_SORT_SEQ", Protocol.OrderBySet.OP_PREWEIGHT) }; // 가중치
 			}
-		}else if(queryCheck == 2) {
-			orderBySet = new OrderBySet[] {
-					new OrderBySet(true, "SORT_CTGRY_OUTPT_TP_CD", Protocol.OrderBySet.OP_PREWEIGHT) }; // 가중치
-		}
 
 		return orderBySet;
 	}
 
-	private WhereSet[] whereSet_fn(Map<String, String> SearchUtil, int queryCheck) {
+	private WhereSet[] whereSet_fn(Map<String, String> SearchUtil) {
 		ArrayList<WhereSet> whereList = new ArrayList<WhereSet>();
 		String[] searchTerm_Array = SearchUtil.get("schlist").split("@@");
 		String orderCheck=SearchUtil.get("order");
@@ -300,7 +284,6 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
 				}
 				if(orderCheck.isEmpty()) {   //가중치 정렬 일때
-					if(queryCheck==1) {
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
 						whereList.add(new WhereSet("IDX_GOD_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 1000));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -326,44 +309,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						whereList.add(new WhereSet("IDX_GOD_NO", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-					}else if(queryCheck==2) {
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 500));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 500));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-					}else if(queryCheck==3) {
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_PROMT_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],1000));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],900));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_TAG_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],300));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],500));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("TOTAL_SEARCH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],1));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_SN", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],100));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						// 회원유형 -이벤트 기획전
-						if (!SearchUtil.get("tgtMbrAtrbCd").equals("")) {
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-							whereList.add(new WhereSet("IDX_TGT_MBR_ATRB_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("tgtMbrAtrbCd")));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						}
-								
-						// 노출디바이스 -이벤트 기획전
-						if (!SearchUtil.get("dvcCd").equals("")) {
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-							whereList.add(new WhereSet("IDX_DVC_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("dvcCd")));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						}
-					}
 				}else if(!orderCheck.isEmpty()) {   // 가중치 정렬이 아닐때
-					if(queryCheck==1) {
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
 						whereList.add(new WhereSet("IDX_GOD_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -392,46 +338,10 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
 						whereList.add(new WhereSet("IDX_SOLDOUT_YN", Protocol.WhereSet.OP_HASALL, "Y", -9999999));
 					
-					}else if(queryCheck==2) {
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-					}else if(queryCheck==3) {
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_PROMT_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_TAG_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("TOTAL_SEARCH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_SN", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						// 회원유형 -이벤트 기획전
-						if (!SearchUtil.get("tgtMbrAtrbCd").equals("")) {
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-							whereList.add(new WhereSet("IDX_TGT_MBR_ATRB_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("tgtMbrAtrbCd")));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						}
-								
-						// 노출디바이스 -이벤트 기획전
-						if (!SearchUtil.get("dvcCd").equals("")) {
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-							whereList.add(new WhereSet("IDX_DVC_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("dvcCd")));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						}
-					}
 				}
 			}
 		}
-		if(queryCheck==1) {
+		
 			// 카테고리코드 시작
 			if (!SearchUtil.get("category01").equals("") || !SearchUtil.get("category02").equals("")|| !SearchUtil.get("category03").equals("") || !SearchUtil.get("category04").equals("")|| !SearchUtil.get("category05").equals("")) {
 	
@@ -486,7 +396,6 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					}
 					whereList.add(new WhereSet("IDX_DQ_CATEGORY05_CD", Protocol.WhereSet.OP_HASANY,SearchUtil.get("category05"), 0));
 				}
-	
 				whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 			}
 			// 브랜드
@@ -544,7 +453,14 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 				whereList.add(new WhereSet("IDX_SOLDOUT_YN", Protocol.WhereSet.OP_HASANY, SearchUtil.get("soldoutYn")));
 				whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 			}
-		}
+			// 이벤트상품 프로모션 번호 202402 김승욱 추가
+			if (!SearchUtil.get("promtNo").equals("")) {
+				if (whereList.size() > 0)whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
+				whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+				whereList.add(new WhereSet("IDX_PROMT_NO", Protocol.WhereSet.OP_HASANY, SearchUtil.get("promtNo")));
+				whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+			}
+		
 
 		
 		WhereSet[] whereSet = new WhereSet[whereList.size()];
@@ -554,10 +470,9 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		return whereSet;
 	}
 
-	private SelectSet[] selectSet_fn(Map<String, String> SearchUtil, int queryCheck) {
+	private SelectSet[] selectSet_fn(Map<String, String> SearchUtil) {
 		SelectSet[] selectSet = null;
 
-		if (queryCheck == 1) {
 			selectSet = new SelectSet[] { 
 					new SelectSet("BRND_ID", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("BRND_KOR_FLTER_NM", (byte) (Protocol.SelectSet.NONE)),
@@ -615,50 +530,10 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					new SelectSet("DQ_COLOR2", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("DQ_STYLE2", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("DQ_STYLE_SEARCH", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DQ_PRICE", (byte) (Protocol.SelectSet.NONE)) };
-		} else if (queryCheck == 3) {
-			selectSet = new SelectSet[] {
-					new SelectSet("BRND_ID", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_IMG_ALTRTV_CONT", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_IMG_FILE_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_IMG_FILE_URL", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PROMT_TAG_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("CTGRY_OUTPT_TP_CD", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DQ_BRAND", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DSP_BEG_DT", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DSP_CTGRY_NO", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DSP_END_DT", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DVC_CD", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("MOBILE_IMG_ALTRTV_CONT", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("MOBILE_IMG_FILE_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("MOBILE_IMG_FILE_URL", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("OUTPT_LINK_URL", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("OUTPT_SECT_CD", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PC_IMG_ALTRTV_CONT", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PC_IMG_FILE_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PC_IMG_FILE_URL", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PROMT_ASSTN_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PROMT_GUBUN", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PROMT_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PROMT_SN", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PROMT_TP_CD", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("TGT_MBR_ATRB_CD", (byte) (Protocol.SelectSet.NONE)) };
-		} else if (queryCheck == 2) {
-			selectSet = new SelectSet[] { 
-					new SelectSet("BRND_ID", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_IMG_ALTRTV_CONT", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_IMG_FILE_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_IMG_FILE_URL", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("BRND_KOR_FLTER_NM", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("CTGRY_OUTPT_TP_CD", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DSP_CTGRY_NO", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("OUTPT_LINK_URL", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("OUTPT_SECT_CD", (byte) (Protocol.SelectSet.NONE)) };
-		};
-
-	
+					new SelectSet("DQ_PRICE", (byte) (Protocol.SelectSet.NONE)),
+					new SelectSet("TARGET_TP", (byte) (Protocol.SelectSet.NONE)),
+					new SelectSet("PROMT_NO", (byte) (Protocol.SelectSet.NONE)) 
+					};
 
 	return selectSet;
 
@@ -694,15 +569,15 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		Gson gson=new Gson();
 		JsonParser jsonParser=new JsonParser();
 		
-		if (resultSet != null) {
-			Result[] resultList = resultSet.getResultList();
-			if (resultList.length >= 2) {
-				int totalcheck = resultList[0].getTotalSize();
-				if(!"".equals(checksch) && fltrYn.equals("N") && researchYn.equals("N")){
-					setSearchLog(tcgubuncheck, totalcheck, checksch);
-				}
-			}
-		}
+//		if (resultSet != null) {
+//			Result[] resultList = resultSet.getResultList();
+//			if (resultList.length >= 2) {
+//				int totalcheck = resultList[0].getTotalSize();
+//				if(!"".equals(checksch) && fltrYn.equals("N") && researchYn.equals("N")){
+//					setSearchLog(tcgubuncheck, totalcheck, checksch);
+//				}
+//			}
+//		}
 		if(returnCode > -100){ 	
 			JsonObject resultJsonObj = jsonParser.parse(resultJson).getAsJsonObject();
 			JsonArray resultJsonArr = resultJsonObj.get("resultSet").getAsJsonObject().get("result").getAsJsonArray();
