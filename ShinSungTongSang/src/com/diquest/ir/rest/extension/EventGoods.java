@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-public class EventGoods_Dev implements QuerySetExtension, ResultJsonExtension {
+public class EventGoods implements QuerySetExtension, ResultJsonExtension {
 
 	@Override
 	public void init() {
@@ -33,7 +33,6 @@ public class EventGoods_Dev implements QuerySetExtension, ResultJsonExtension {
 	@Override
 	public QuerySet makeQuerySet(RestHttpRequest request) {
 		Map<String, String> SearchUtil = request.getParams();
-		String schgubun = SearchUtil.get("schgubun"); // 검색구분
 
 		QuerySet querySet = null;
 		querySet = new QuerySet(1);
@@ -42,21 +41,13 @@ public class EventGoods_Dev implements QuerySetExtension, ResultJsonExtension {
 		Query query01 = null; 
 
 		try {
-			if (schgubun.equals("total")) {
-				query01 = query_fn(SearchUtil);
-				querySet.addQuery(query01);
-			} else if (schgubun.equals("category")) {
-				query01 = query_fn(SearchUtil);
-				querySet.addQuery(query01);
-			} else if (schgubun.equals("shop")) {
-				query01 = query_fn(SearchUtil);
-				querySet.addQuery(query01);
-			}
-
+			query01 = query_fn(SearchUtil);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		querySet.addQuery(query01);
+
 
 		return querySet;
 	}
@@ -157,42 +148,21 @@ public class EventGoods_Dev implements QuerySetExtension, ResultJsonExtension {
 			}
 		}
 
-		if(testgubun.equals("dev")) {
-				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING|Protocol.RankingOption.DOCUMENT_RANKING));
-				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
-				if(schgubun.equals("total")||schgubun.equals("category")){
-					query.setGroupBy(groupSet_fn(SearchUtil));
-					if (setKeywordCheck(sch)) {
-						query.setResultModifier("typo");
-						query.setValue("typo-parameters", sch);
-						query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
-						query.setValue("typo-correct-result-num", "1");
-					}
-					if (!price01.equals("") && !price02.equals("")) {
-						query.setFilter(fileterSet_fn(SearchUtil));
-					}
-				}
-				query.setQueryModifier("diver");				
-				query.setFrom("EVT_GOODS");
-				
-		}else if(testgubun.equals("stg")) {
-				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING));
-				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
-				if(schgubun.equals("total")||schgubun.equals("category")){
-					query.setGroupBy(groupSet_fn(SearchUtil));
-					if (setKeywordCheck(sch)) {
-						query.setResultModifier("typo");
-						query.setValue("typo-parameters", sch);
-						query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
-						query.setValue("typo-correct-result-num", "1");
-					}
-					if (!price01.equals("") && !price02.equals("")) {
-						query.setFilter(fileterSet_fn(SearchUtil));
-					}
-				}
-				query.setQueryModifier("diver");				
-				query.setFrom("EVT_GOODS");
+		query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING));
+		query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
+		if(schgubun.equals("total")||schgubun.equals("category")){
+			query.setGroupBy(groupSet_fn(SearchUtil));
+			if (setKeywordCheck(sch)) {
+				query.setResultModifier("typo");
+				query.setValue("typo-parameters", sch);
+				query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
+				query.setValue("typo-correct-result-num", "1");
+			}
+			if (!price01.equals("") && !price02.equals("")) {
+				query.setFilter(fileterSet_fn(SearchUtil));
+			}
 		}
+		query.setFrom("EVT_GOODS");
 			
 		query.setSelect(selectSet_fn(SearchUtil));
 		
@@ -264,6 +234,9 @@ public class EventGoods_Dev implements QuerySetExtension, ResultJsonExtension {
 			} else if (SearchUtil.get("order").equals("SCORE")) {
 				orderBySet = new OrderBySet[] {
 						new OrderBySet(true, "SORT_EVL_SCORE", Protocol.OrderBySet.OP_PREWEIGHT) }; // 별점순
+			} else if (SearchUtil.get("order").equals("DSP")) {
+				orderBySet = new OrderBySet[] {
+						new OrderBySet(true, "SORT_DSP_SORT_SEQ", Protocol.OrderBySet.OP_PREWEIGHT) }; // MD'S PICK 순 
 			} else {
 				orderBySet = new OrderBySet[] {
 						new OrderBySet(true, "SORT_BST_GOD_SORT_SEQ", Protocol.OrderBySet.OP_PREWEIGHT) }; // 가중치
@@ -532,7 +505,10 @@ public class EventGoods_Dev implements QuerySetExtension, ResultJsonExtension {
 					new SelectSet("DQ_STYLE_SEARCH", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("DQ_PRICE", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("TARGET_TP", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("PROMT_NO", (byte) (Protocol.SelectSet.NONE)) 
+					new SelectSet("PROMT_NO", (byte) (Protocol.SelectSet.NONE)), 
+					new SelectSet("IMG_UDT", (byte) (Protocol.SelectSet.NONE)),
+                    new SelectSet("SIZE_FILTER_YN", (byte) (Protocol.SelectSet.NONE)),
+					new SelectSet("DSP_SORT_SEQ", (byte) (Protocol.SelectSet.NONE))
 					};
 
 	return selectSet;
