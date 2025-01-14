@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-public class Search_Dev implements QuerySetExtension, ResultJsonExtension {
+public class SearchC implements QuerySetExtension, ResultJsonExtension {
 
 	@Override
 	public void init() {
@@ -104,6 +104,7 @@ public class Search_Dev implements QuerySetExtension, ResultJsonExtension {
 		String soldoutYn  = SearchUtil.get("soldoutYn") != null ? SearchUtil.get("soldoutYn") : ""; //	
 		String fltrYn  = SearchUtil.get("fltrYn") != null ? SearchUtil.get("fltrYn") : ""; //필터 여부	
 		String researchYn  = SearchUtil.get("researchYn") != null ? SearchUtil.get("researchYn") : ""; //재검색 여부	
+		String newYn  = SearchUtil.get("newYn") != null ? SearchUtil.get("newYn") : ""; //신상품
 		
 		//System.out.println("::::fltrYn::::\n"+fltrYn + "::::researchYn>>" +researchYn);
 
@@ -150,6 +151,7 @@ public class Search_Dev implements QuerySetExtension, ResultJsonExtension {
 		SearchUtil.put("otltyn", otltyn);
 		SearchUtil.put("rprstGodYn", rprstGodYn);
 		SearchUtil.put("soldoutYn", soldoutYn);
+		SearchUtil.put("newYn", newYn);
 		QueryParser queryParser = new QueryParser();
 
 		Query query = new Query(startTag, endTag);
@@ -164,8 +166,7 @@ public class Search_Dev implements QuerySetExtension, ResultJsonExtension {
 				query.setLoggable(false);
 			}
 		}
-		
-		if(testgubun.equals("dev")) {
+
 			if (queryCheck == 1) {
 				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING|Protocol.RankingOption.DOCUMENT_RANKING|Protocol.RankingOption.CLICK_RANKING));
 				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
@@ -182,7 +183,7 @@ public class Search_Dev implements QuerySetExtension, ResultJsonExtension {
 					}
 				}
 				query.setQueryModifier("diver");				
-				query.setFrom("MAIN");
+				query.setFrom("MAIN_C");
 				
 			}
 			if (queryCheck == 2) {
@@ -191,35 +192,6 @@ public class Search_Dev implements QuerySetExtension, ResultJsonExtension {
 			if (queryCheck == 3) {
 				query.setFrom("PLN_ENT");
 			}
-			
-		}else if(testgubun.equals("stg")) {
-			if (queryCheck == 1) {
-				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING));
-				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
-				if(schgubun.equals("total")||schgubun.equals("category")){
-					query.setGroupBy(groupSet_fn(SearchUtil, queryCheck));
-					if (setKeywordCheck(sch)) {
-						query.setResultModifier("typo");
-						query.setValue("typo-parameters", sch);
-						query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
-						query.setValue("typo-correct-result-num", "1");
-					}
-					if (!price01.equals("") && !price02.equals("")) {
-						query.setFilter(fileterSet_fn(SearchUtil));
-					}
-				}
-				query.setQueryModifier("diver");				
-				query.setFrom("STG_MAIN");
-				
-			}
-			if (queryCheck == 2) {
-				query.setFrom("STG_BRAND");
-			}
-			if (queryCheck == 3) {
-				query.setFrom("STG_PLN_ENT");
-			}
-		}
-
 			
 		query.setSelect(selectSet_fn(SearchUtil, queryCheck));
 		

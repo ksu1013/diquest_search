@@ -101,12 +101,12 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		String testgubun = SearchUtil.get("testgubun") != null ? SearchUtil.get("testgubun") : ""; // 테스트 체크 = dev/stg
 		String otltyn = SearchUtil.get("otltyn") != null ? SearchUtil.get("otltyn") : ""; // 아울렛체크
 		String rprstGodYn  = SearchUtil.get("rprstGodYn") != null ? SearchUtil.get("rprstGodYn") : ""; // 카데고리 대표상품 여부 체크
-		String soldoutYn  = SearchUtil.get("soldoutYn") != null ? SearchUtil.get("soldoutYn") : ""; //
-		String fltrYn  = SearchUtil.get("fltrYn") != null ? SearchUtil.get("fltrYn") : ""; //
-		String researchYn  = SearchUtil.get("researchYn") != null ? SearchUtil.get("researchYn") : ""; //
-
-			System.out.println("::::fltrYn::::\n"+fltrYn + "::::researchYn>>"+researchYn);	
+		String soldoutYn  = SearchUtil.get("soldoutYn") != null ? SearchUtil.get("soldoutYn") : ""; //	
+		String fltrYn  = SearchUtil.get("fltrYn") != null ? SearchUtil.get("fltrYn") : ""; //필터 여부	
+		String researchYn  = SearchUtil.get("researchYn") != null ? SearchUtil.get("researchYn") : ""; //재검색 여부	
 		
+		//System.out.println("::::fltrYn::::\n"+fltrYn + "::::researchYn>>" +researchYn);
+
 		if ((!sch.equals("") && resch.equals("Y") )) {
 			if(schlist.indexOf(sch) >1) {
 				//schlist = schlist;
@@ -116,6 +116,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		} else {
 			schlist = sch;
 		}
+		
 		
 		int page2 = Integer.parseInt(currentPage);
 		int page3 = Integer.parseInt(perDiv);
@@ -146,21 +147,15 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		SearchUtil.put("schgubun", schgubun);
 		SearchUtil.put("tgtMbrAtrbCd", tgtMbrAtrbCd);
 		SearchUtil.put("dvcCd", dvcCd);
-		SearchUtil.put("testgubun", testgubun);
 		SearchUtil.put("otltyn", otltyn);
 		SearchUtil.put("rprstGodYn", rprstGodYn);
 		SearchUtil.put("soldoutYn", soldoutYn);
-		//QueryParser queryParser = new QueryParser();
+		QueryParser queryParser = new QueryParser();
 
 		Query query = new Query(startTag, endTag);
 		query.setResult(startPage, endPage);
 		query.setDebug(true);
-		query.setPrintQuery(true);
-		//if (!sch.equals("") && (fltrYn.equals("N") && researchYn.equals("N"))) {
-		//	query.setLoggable(true);
-		//	query.setLogKeyword(sch.toCharArray());
-		//}
-
+		query.setPrintQuery(false);
 		if (!sch.equals("")) {
 			query.setLoggable(true);
 			query.setLogKeyword(sch.toCharArray());
@@ -170,31 +165,31 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 			}
 		}
 
-		if (queryCheck == 1) {
-			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING|Protocol.RankingOption.DOCUMENT_RANKING));
-			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
-			if(schgubun.equals("total")||schgubun.equals("category")){
-				query.setGroupBy(groupSet_fn(SearchUtil, queryCheck));
-				if (setKeywordCheck(sch)) {
-					query.setResultModifier("typo");
-					query.setValue("typo-parameters", sch);
-					query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
-					query.setValue("typo-correct-result-num", "1");
+			if (queryCheck == 1) {
+				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING|Protocol.RankingOption.DOCUMENT_RANKING|Protocol.RankingOption.CLICK_RANKING));
+				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
+				if(schgubun.equals("total")||schgubun.equals("category")){
+					query.setGroupBy(groupSet_fn(SearchUtil, queryCheck));
+					if (setKeywordCheck(sch)) {
+						query.setResultModifier("typo");
+						query.setValue("typo-parameters", sch);
+						query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
+						query.setValue("typo-correct-result-num", "1");
+					}
+					if (!price01.equals("") && !price02.equals("")) {
+						query.setFilter(fileterSet_fn(SearchUtil));
+					}
 				}
-				if (!price01.equals("") && !price02.equals("")) {
-					query.setFilter(fileterSet_fn(SearchUtil));
-				}
+				query.setQueryModifier("diver");				
+				query.setFrom("MAIN");
+				
 			}
-			query.setQueryModifier("diver");				
-			query.setFrom("MAIN");
-			
-		}
-		if (queryCheck == 2) {
-			query.setFrom("BRAND");
-		}
-		if (queryCheck == 3) {
-			query.setFrom("PLN_ENT");
-		}
+			if (queryCheck == 2) {
+				query.setFrom("BRAND");
+			}
+			if (queryCheck == 3) {
+				query.setFrom("PLN_ENT");
+			}
 			
 		query.setSelect(selectSet_fn(SearchUtil, queryCheck));
 		
@@ -211,8 +206,11 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		// 동의어, 유의어 확장
 		query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
 
-		 //System.out.println("::::queryParser::::\n"+queryParser.queryToString(query));
-		return query;
+		if(testgubun.equals("Y")){
+		
+		 System.out.println("::::queryParser::::\n"+queryParser.queryToString(query));
+		}
+		 return query;
 	}
 
 	private FilterSet[] fileterSet_fn(Map<String, String> SearchUtil) {
@@ -291,7 +289,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 	private WhereSet[] whereSet_fn(Map<String, String> SearchUtil, int queryCheck) {
 		ArrayList<WhereSet> whereList = new ArrayList<WhereSet>();
 		String[] searchTerm_Array = SearchUtil.get("schlist").split("@@");
-		String orderCheck=SearchUtil.get("order");
+		String orderCheck = SearchUtil.get("order");
 		
 		if(!SearchUtil.get("schlist").equals("")) {
 			for (int i = 0; i < searchTerm_Array.length; i++) {
@@ -299,135 +297,138 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 				if (i != 0) {
 					whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
 				}
-				if(orderCheck.isEmpty()) {   //가중치 정렬 일때
-					if(queryCheck==1) {
+				if(orderCheck.isEmpty()) { //가중치 정렬 일 때
+				    if(queryCheck==1) {
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+					whereList.add(new WhereSet("IDX_GOD_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 1000));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_GOD_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 900));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 500));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 500));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_GOD_SRCH_SNM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 1));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_DQ_CATEGORY_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
+				//	whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				//	whereList.add(new WhereSet("IDX_DQ_CATEGORY02_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 900));
+				//	whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				//	whereList.add(new WhereSet("IDX_DQ_CATEGORY03_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 900));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_DQ_CATEGORY04_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 900));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_DQ_CATEGORY05_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 900));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("TATAL_SEACH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 1));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_GOD_NO", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_DQ_STYLE_SEARCH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				    }else if(queryCheck==2) {
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+					whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 500));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 500));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				    }else if(queryCheck==3) {
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+					whereList.add(new WhereSet("IDX_PROMT_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],1000));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_PROMT_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],900));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_PROMT_TAG_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],300));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],500));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("TOTAL_SEARCH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],1));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_PROMT_SN", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],100));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					// 회원유형 -이벤트 기획전
+					if (!SearchUtil.get("tgtMbrAtrbCd").equals("")) {
+						whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_GOD_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 1000));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_GOD_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 900));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 500));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 500));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_GOD_SRCH_SNM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 300));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_DQ_CATEGORY_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_DQ_CATEGORY02_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
-//						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-//						whereList.add(new WhereSet("IDX_DQ_CATEGORY03_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_DQ_CATEGORY04_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_DQ_CATEGORY05_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("TATAL_SEACH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 1));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_GOD_NO", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
+						whereList.add(new WhereSet("IDX_TGT_MBR_ATRB_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("tgtMbrAtrbCd")));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-					}else if(queryCheck==2) {
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 500));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 500));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-					}else if(queryCheck==3) {
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_PROMT_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],1000));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],900));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_TAG_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],300));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],500));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("TOTAL_SEARCH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],1));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_SN", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],100));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						// 회원유형 -이벤트 기획전
-						if (!SearchUtil.get("tgtMbrAtrbCd").equals("")) {
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-							whereList.add(new WhereSet("IDX_TGT_MBR_ATRB_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("tgtMbrAtrbCd")));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						}
-								
-						// 노출디바이스 -이벤트 기획전
-						if (!SearchUtil.get("dvcCd").equals("")) {
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-							whereList.add(new WhereSet("IDX_DVC_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("dvcCd")));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						}
 					}
-				}else if(!orderCheck.isEmpty()) {   // 가중치 정렬이 아닐때
-					if(queryCheck==1) {
+							
+					// 노출디바이스 -이벤트 기획전
+					if (!SearchUtil.get("dvcCd").equals("")) {
+						whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_GOD_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_GOD_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_GOD_SRCH_SNM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_DQ_CATEGORY_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_DQ_CATEGORY02_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-//						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-//						whereList.add(new WhereSet("IDX_DQ_CATEGORY03_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 100));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_DQ_CATEGORY04_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_DQ_CATEGORY05_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("TATAL_SEACH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_GOD_NO", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+						whereList.add(new WhereSet("IDX_DVC_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("dvcCd")));
 						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
-						whereList.add(new WhereSet("IDX_SOLDOUT_YN", Protocol.WhereSet.OP_HASALL, "Y", -9999999));
-					
-					}else if(queryCheck==2) {
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-					}else if(queryCheck==3) {
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						whereList.add(new WhereSet("IDX_PROMT_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_TAG_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("TOTAL_SEARCH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						whereList.add(new WhereSet("IDX_PROMT_SN", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
-						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						// 회원유형 -이벤트 기획전
-						if (!SearchUtil.get("tgtMbrAtrbCd").equals("")) {
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-							whereList.add(new WhereSet("IDX_TGT_MBR_ATRB_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("tgtMbrAtrbCd")));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						}
-								
-						// 노출디바이스 -이벤트 기획전
-						if (!SearchUtil.get("dvcCd").equals("")) {
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-							whereList.add(new WhereSet("IDX_DVC_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("dvcCd")));
-							whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						}
 					}
+				    } 
+				}else if(!orderCheck.isEmpty()) { //가중치 정렬이 아닐 때
+				    if(queryCheck==1) {
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+					whereList.add(new WhereSet("IDX_GOD_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_GOD_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_GOD_SRCH_SNM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_DQ_CATEGORY_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+				//	whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				//	whereList.add(new WhereSet("IDX_DQ_CATEGORY02_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 900));
+				//	whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				//	whereList.add(new WhereSet("IDX_DQ_CATEGORY03_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 900));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_DQ_CATEGORY04_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_DQ_CATEGORY05_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("TATAL_SEACH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_GOD_NO", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_DQ_STYLE_SEARCH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i], 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
+					whereList.add(new WhereSet("IDX_SOLDOUT_YN", Protocol.WhereSet.OP_HASALL, "Y", -9999999));
+				    }else if(queryCheck==2) {
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+					whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_BRND_KOR_FLTER_NM", Protocol.WhereSet.OP_HASALL, SearchUtil.get("sch"), 0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				    }else if(queryCheck==3) {
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+					whereList.add(new WhereSet("IDX_PROMT_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_PROMT_NM_BI", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_PROMT_TAG_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_BRND_NM", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("TOTAL_SEARCH", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					whereList.add(new WhereSet("IDX_PROMT_SN", Protocol.WhereSet.OP_HASALL, searchTerm_Array[i],0));
+					whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					// 회원유형 -이벤트 기획전
+					if (!SearchUtil.get("tgtMbrAtrbCd").equals("")) {
+						whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
+						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						whereList.add(new WhereSet("IDX_TGT_MBR_ATRB_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("tgtMbrAtrbCd")));
+						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					}
+							
+					// 노출디바이스 -이벤트 기획전
+					if (!SearchUtil.get("dvcCd").equals("")) {
+						whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
+						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						whereList.add(new WhereSet("IDX_DVC_CD", Protocol.WhereSet.OP_HASANY, SearchUtil.get("dvcCd")));
+						whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					}
+				    } 
 				}
 			}
 		}
@@ -544,6 +545,12 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 				whereList.add(new WhereSet("IDX_SOLDOUT_YN", Protocol.WhereSet.OP_HASANY, SearchUtil.get("soldoutYn")));
 				whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 			}
+			if (!SearchUtil.get("newYn").equals("")) { //20241113 newYn(신상품) 추가 김승욱
+				if (whereList.size() > 0)whereList.add(new WhereSet(Protocol.WhereSet.OP_AND));
+				whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+				whereList.add(new WhereSet("IDX_NEWYN", Protocol.WhereSet.OP_HASANY, SearchUtil.get("newYn")));
+				whereList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+			}
 		}
 
 		
@@ -615,7 +622,12 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					new SelectSet("DQ_COLOR2", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("DQ_STYLE2", (byte) (Protocol.SelectSet.NONE)),
 					new SelectSet("DQ_STYLE_SEARCH", (byte) (Protocol.SelectSet.NONE)),
-					new SelectSet("DQ_PRICE", (byte) (Protocol.SelectSet.NONE)) };
+					new SelectSet("DQ_PRICE", (byte) (Protocol.SelectSet.NONE)), 
+					new SelectSet("IMG_UDT", (byte) (Protocol.SelectSet.NONE)),   // 2024.02.21 add
+					new SelectSet("SIZE_FILTER_YN", (byte) (Protocol.SelectSet.NONE)),  // 2024.02.21 add
+					new SelectSet("ORD_DC_AMT", (byte) (Protocol.SelectSet.NONE)),			    // 2024.07.16 add
+					new SelectSet("ORD_DC_CND_MIN_QTY", (byte) (Protocol.SelectSet.NONE)),	    // 2024.07.16 add
+					new SelectSet("NEW_YN", (byte) (Protocol.SelectSet.NONE)) };	    // 2024.11.13 add
 		} else if (queryCheck == 3) {
 			selectSet = new SelectSet[] {
 					new SelectSet("BRND_ID", (byte) (Protocol.SelectSet.NONE)),
@@ -682,13 +694,11 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 			int returnCode, HashMap<String, String> responseHeaders) {
 		String checksch = request.getParams().get("sch");
 		String tcgubuncheck = request.getParams().get("tcgubun");
-		String fltrYn = request.getParams().get("fltrYn") != null ? request.getParams().get("fltrYn") : ""; //
-		String researchYn = request.getParams().get("researchYn") != null ? request.getParams().get("researchYn") : ""; //
-		//String fltrYn = SearchUtil.get("fltrYn") != null ? SearchUtil.get("fltrYn") : ""; //
-		//String researchYn = SearchUtil.get("researchYn") != null ? SearchUtil.get("researchYn") : ""; //
+		String fltrYn = request.getParams().get("fltrYn") != null ? request.getParams().get("fltrYn") : ""; //필터 여부
+		String researchYn = request.getParams().get("researchYn") != null ? request.getParams().get("researchYn") : ""; //재검색 여부
 
-		System.out.println("LOG_T::::fltrYn::::\n"+fltrYn + "::::researchYn>>"+researchYn);	
-
+		//System.out.println("LOG_T::::fltrYn::::\n"+fltrYn + "::::researchYn>>"+researchYn);
+														  
 		QueryParser queryParser = new QueryParser();            //QueryParser
 		Query query = null;   
 		Gson gson=new Gson();
@@ -698,7 +708,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 			Result[] resultList = resultSet.getResultList();
 			if (resultList.length >= 2) {
 				int totalcheck = resultList[0].getTotalSize();
-				if(!"".equals(checksch) && fltrYn.equals("N") && researchYn.equals("N")){
+				if(!"".equals(checksch) && fltrYn.equals("N") && researchYn.equals("N")){	
 					setSearchLog(tcgubuncheck, totalcheck, checksch);
 				}
 			}
@@ -717,19 +727,18 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 					 GroupBySet groupBySet = query.getGroupSelectFields()[j];
 					 JsonObject groupResultObj = groupResultArray.get(j).getAsJsonObject();
 					 String[] groupCheck= groupResultObj.get("ids").toString().split(",");
-					 String[] groupCheck1= groupResultObj.get("ids").toString().split(",");
-				
+//					 String[] kkk1= groupResultObj.get("values").toString().split(",");
 					 if(groupCheck.length>2) {
 						 for (int k = 0; k < groupCheck.length; k++) {
-							 if(groupCheck[k].length()==2 ||groupCheck[k].length()==3) {
+							 if(groupCheck[k].length()==2 || groupCheck[k].length()==3) {
 								 JsonArray groupCheckArray = (JsonArray) groupResultObj.get("ids");
 								 JsonArray groupCheckArray1 = (JsonArray) groupResultObj.get("values");
 								 groupCheckArray.remove(k);
 								 groupCheckArray1.remove(k);
 							 }
 						 }
-					 
 					 }
+					 
 					 groupResultObj.addProperty("field", String.valueOf(groupBySet.getField()));
 					
 				}
@@ -739,7 +748,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 		}else{
 			if(querySet != null){
 				query = querySet.getQuery(0);
-				System.out.println(returnCode+" ##### total_nanet= " + queryParser.queryToString(query));
+				//System.out.println(returnCode+" ##### total_nanet= " + queryParser.queryToString(query));
 			}
 		}
 
@@ -777,7 +786,7 @@ public class Search implements QuerySetExtension, ResultJsonExtension {
 
 		try {
 			int returncode = command.request(querySet);
-			System.out.println("[ Log search returncode ] = " + returncode + ", [ sch ] = " + checksch);
+			//System.out.println("[ Log search returncode ] = " + returncode + ", [ sch ] = " + checksch);
 		} catch (IRException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

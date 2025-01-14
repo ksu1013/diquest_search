@@ -119,7 +119,7 @@ public class AutoComplete implements QuerySetExtension {
 		Query query = new Query(startTag,endTag);
 		query.setResult(0, 9);
 		query.setDebug(true);
-		query.setPrintQuery(true);
+		query.setPrintQuery(false);
 		query.setFrom("AUTOCOMPLETE");
 		query.setLoggable(false);
 		query.setLogKeyword(search.toCharArray());

@@ -137,27 +137,22 @@ public class EventGoods implements QuerySetExtension, ResultJsonExtension {
 		Query query = new Query(startTag, endTag);
 		query.setResult(startPage, endPage);
 		query.setDebug(true);
-		query.setPrintQuery(true);
+		query.setPrintQuery(false);
 
-		if (!sch.equals("")) {
-			query.setLoggable(true);
-			query.setLogKeyword(sch.toCharArray());
+		if(!promtNo.equals("")){
+            query.setLoggable(true);
+            query.setLogKeyword(promtNo.toCharArray());
+                  if (fltrYn.equals("Y") || researchYn.equals("Y")) {
+                          query.setLoggable(false);
+                  }
 
-			if (fltrYn.equals("Y") || researchYn.equals("Y")) {
-				query.setLoggable(false);
-			}
-		}
+          }
+
 
 		query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING));
 		query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.QUASI_SYNONYM| Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.MULTI_TERM_KOREAN));
 		if(schgubun.equals("total")||schgubun.equals("category")){
 			query.setGroupBy(groupSet_fn(SearchUtil));
-			if (setKeywordCheck(sch)) {
-				query.setResultModifier("typo");
-				query.setValue("typo-parameters", sch);
-				query.setValue("typo-options","ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL|REMOVE_HANGUL_JAMO_ALL|CORRECT_HANGUL_SPELL");
-				query.setValue("typo-correct-result-num", "1");
-			}
 			if (!price01.equals("") && !price02.equals("")) {
 				query.setFilter(fileterSet_fn(SearchUtil));
 			}
@@ -531,29 +526,12 @@ public class EventGoods implements QuerySetExtension, ResultJsonExtension {
 	@Override
 	public String modifyResponseJson(RestHttpRequest request, QuerySet querySet, ResultSet resultSet, String resultJson,
 			int returnCode, HashMap<String, String> responseHeaders) {
-		String checksch = request.getParams().get("sch");
-		String tcgubuncheck = request.getParams().get("tcgubun");
-		String fltrYn = request.getParams().get("fltrYn") != null ? request.getParams().get("fltrYn") : ""; //
-		String researchYn = request.getParams().get("researchYn") != null ? request.getParams().get("researchYn") : ""; //
-		//String fltrYn = SearchUtil.get("fltrYn") != null ? SearchUtil.get("fltrYn") : ""; //
-		//String researchYn = SearchUtil.get("researchYn") != null ? SearchUtil.get("researchYn") : ""; //
-
-		System.out.println("LOG_T::::fltrYn::::\n"+fltrYn + "::::researchYn>>"+researchYn);	
 
 		QueryParser queryParser = new QueryParser();            //QueryParser
 		Query query = null;   
 		Gson gson=new Gson();
 		JsonParser jsonParser=new JsonParser();
 		
-//		if (resultSet != null) {
-//			Result[] resultList = resultSet.getResultList();
-//			if (resultList.length >= 2) {
-//				int totalcheck = resultList[0].getTotalSize();
-//				if(!"".equals(checksch) && fltrYn.equals("N") && researchYn.equals("N")){
-//					setSearchLog(tcgubuncheck, totalcheck, checksch);
-//				}
-//			}
-//		}
 		if(returnCode > -100){ 	
 			JsonObject resultJsonObj = jsonParser.parse(resultJson).getAsJsonObject();
 			JsonArray resultJsonArr = resultJsonObj.get("resultSet").getAsJsonObject().get("result").getAsJsonArray();
@@ -590,7 +568,7 @@ public class EventGoods implements QuerySetExtension, ResultJsonExtension {
 		}else{
 			if(querySet != null){
 				query = querySet.getQuery(0);
-				System.out.println(returnCode+" ##### total_nanet= " + queryParser.queryToString(query));
+				//System.out.println(returnCode+" ##### total_nanet= " + queryParser.queryToString(query));
 			}
 		}
 
@@ -599,41 +577,5 @@ public class EventGoods implements QuerySetExtension, ResultJsonExtension {
 		return resultJson;
 	}
 
-	public static void setSearchLog(String tcgubuncheck, int tatalcheck, String checksch) {
-
-		CommandSearchRequest command = null;
-		Query query = new Query();
-		QuerySet querySet = new QuerySet(1);
-
-		CommandSearchRequest.setProps("127.0.0.1", 5555, 5000, 100, 100);
-		command = new CommandSearchRequest("127.0.0.1", 5555);
-
-		SelectSet[] selectSets = new SelectSet[] { new SelectSet("ALL") };
-		WhereSet[] whereSet = null;
-		if (tatalcheck > 0) {
-			whereSet = new WhereSet[] { new WhereSet("IDX_CHECK", Protocol.WhereSet.OP_HASALL, "a") };
-		} else if (tatalcheck <= 0) {
-			whereSet = new WhereSet[] { new WhereSet("IDX_CHECK", Protocol.WhereSet.OP_HASALL, "b") };
-		}
-
-		query.setFrom("LOG_" + tcgubuncheck.toUpperCase());
-
-		query.setLoggable(true);
-		query.setLogKeyword(checksch.toCharArray());
-		query.setResult(0, 0);
-		query.setDebug(true);
-		query.setWhere(whereSet);
-		query.setSelect(selectSets);
-		querySet.addQuery(query);
-
-		try {
-			int returncode = command.request(querySet);
-			System.out.println("[ Log search returncode ] = " + returncode + ", [ sch ] = " + checksch);
-		} catch (IRException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
 
 }
